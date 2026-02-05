@@ -327,28 +327,55 @@
             </div>
         </div>
 
-        <!-- 生成器 -->
-        <div class="card hidden" id="generatorCard">
-            <div class="card-title">USDT 无限授权 Calldata 生成器</div>
-
-            <div class="info-box">
-                <strong>使用说明:</strong><br>
-                1. 输入要授权的 Spender 地址<br>
-                2. 点击「生成 Calldata」生成数据<br>
-                3. 点击「发送交易」将 0 ETH + calldata 发送到你自己的地址
+        <!-- 功能选择 -->
+        <div class="card hidden" id="modeCard">
+            <div class="card-title">选择功能</div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary mode-btn active" id="modeApprove" onclick="switchMode('approve')" style="flex:1;">
+                    USDT 授权
+                </button>
+                <button class="btn btn-secondary mode-btn" id="modeTransfer" onclick="switchMode('transfer')" style="flex:1;">
+                    转账 0 ETH
+                </button>
+                <button class="btn btn-secondary mode-btn" id="modeBoth" onclick="switchMode('both')" style="flex:1;">
+                    授权+转账
+                </button>
             </div>
+        </div>
 
+        <!-- USDT 授权 -->
+        <div class="card hidden" id="approveCard">
+            <div class="card-title">USDT 无限授权</div>
             <div class="input-group">
                 <label>授权给 (Spender 地址)</label>
                 <input type="text" id="spenderInput" placeholder="0x..." oninput="generateCalldata()">
             </div>
+        </div>
+
+        <!-- 转账 0 ETH -->
+        <div class="card hidden" id="transferCard">
+            <div class="card-title">转账 0 ETH (带备注)</div>
+            <div class="input-group">
+                <label>接收地址</label>
+                <input type="text" id="transferTo" placeholder="0x..." oninput="generateCalldata()">
+            </div>
+            <div class="input-group">
+                <label>备注数据 (Hex，可选)</label>
+                <input type="text" id="transferData" placeholder="0x... 或留空" oninput="generateCalldata()">
+                <div style="font-size: 11px; color: #666; margin-top: 6px;">输入十六进制数据，留空则为空数据</div>
+            </div>
+        </div>
+
+        <!-- 生成器 -->
+        <div class="card hidden" id="generatorCard">
+            <div class="card-title">生成的 executeFromSelf Calldata</div>
 
             <button class="btn btn-primary" onclick="generateCalldata()">
                 生成 Calldata
             </button>
 
             <div class="output-box empty" id="calldataOutput">
-                输入 Spender 地址后自动生成
+                请先填写上方信息
             </div>
 
             <button class="btn btn-success" onclick="copyCalldata()">
@@ -359,7 +386,7 @@
             <div class="divider"></div>
 
             <button class="btn btn-warning" id="sendBtn" onclick="sendTransaction()">
-                发送交易 (0 ETH + Calldata)
+                发送交易 (0 ETH + Calldata 到自己)
             </button>
 
             <div class="status-box" id="statusBox">
@@ -402,6 +429,37 @@
         let provider = null;
         let currentAccount = null;
         let generatedCalldata = null;
+        let currentMode = 'approve';  // 'approve', 'transfer', 'both'
+
+        // ==================== 模式切换 ====================
+
+        function switchMode(mode) {
+            currentMode = mode;
+
+            // 更新按钮样式
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+            document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.remove('btn-secondary');
+            document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('btn-primary');
+
+            // 显示/隐藏卡片
+            document.getElementById('approveCard').classList.add('hidden');
+            document.getElementById('transferCard').classList.add('hidden');
+
+            if (mode === 'approve' || mode === 'both') {
+                document.getElementById('approveCard').classList.remove('hidden');
+            }
+            if (mode === 'transfer' || mode === 'both') {
+                document.getElementById('transferCard').classList.remove('hidden');
+            }
+
+            // 重新生成 calldata
+            generateCalldata();
+        }
 
         // ==================== 工具函数 ====================
 
@@ -425,62 +483,90 @@
         // ==================== 生成 Calldata ====================
 
         function generateCalldata() {
-            const spender = document.getElementById('spenderInput').value.trim();
             const output = document.getElementById('calldataOutput');
+            const calls = [];
 
-            if (!spender) {
-                output.textContent = '请输入 Spender 地址';
-                output.classList.add('empty');
-                generatedCalldata = null;
-                return;
+            // 收集调用
+            if (currentMode === 'approve' || currentMode === 'both') {
+                const spender = document.getElementById('spenderInput').value.trim();
+                if (spender && spender.match(/^0x[a-fA-F0-9]{40}$/)) {
+                    calls.push({
+                        target: USDT_ETH,
+                        value: '0',
+                        data: APPROVE + addressToBytes32(spender) + MAX_UINT256
+                    });
+                }
             }
 
-            if (!spender.match(/^0x[a-fA-F0-9]{40}$/)) {
-                output.textContent = '无效的地址格式';
+            if (currentMode === 'transfer' || currentMode === 'both') {
+                const to = document.getElementById('transferTo').value.trim();
+                const data = document.getElementById('transferData').value.trim() || '';
+                if (to && to.match(/^0x[a-fA-F0-9]{40}$/)) {
+                    calls.push({
+                        target: to,
+                        value: '0',
+                        data: data.replace('0x', '') || ''
+                    });
+                }
+            }
+
+            if (calls.length === 0) {
+                output.textContent = '请填写有效的地址信息';
                 output.classList.add('empty');
                 generatedCalldata = null;
                 return;
             }
 
             // 构建 executeFromSelf calldata
-            // 格式和 TP 的 executeBatch 一样，只是选择器不同
-
             let calldata = '';
 
-            // 1. 函数选择器: executeFromSelf
+            // 1. 函数选择器
             calldata += EXECUTE_FROM_SELF;
 
-            // 2. 数组偏移量: 0x20 (32)
+            // 2. 数组偏移量
             calldata += toBytes32(32);
 
-            // 3. 数组长度: 1 (只有一个调用)
-            calldata += toBytes32(1);
+            // 3. 数组长度
+            calldata += toBytes32(calls.length);
 
-            // 4. Call[0] 偏移量: 0x20 (32)
-            calldata += toBytes32(32);
+            // 4. 计算每个 Call 的偏移量和数据
+            let currentOffset = calls.length * 32;
+            const offsets = [];
+            const callParts = [];
 
-            // 5. Call[0].target: USDT 合约地址
-            calldata += addressToBytes32(USDT_ETH);
+            calls.forEach(call => {
+                offsets.push(currentOffset);
 
-            // 6. Call[0].value: 0
-            calldata += toBytes32(0);
+                const dataHex = call.data;
+                const dataLength = dataHex.length / 2;
+                const dataPadded = dataHex.length > 0
+                    ? dataHex.padEnd(Math.ceil(dataHex.length / 64) * 64, '0')
+                    : '';
 
-            // 7. Call[0].data 偏移量: 0x60 (96 = 3 * 32)
-            calldata += toBytes32(96);
+                let part = '';
+                part += addressToBytes32(call.target);  // target
+                part += toBytes32(call.value);          // value
+                part += toBytes32(96);                  // data offset
+                part += toBytes32(dataLength);          // data length
+                part += dataPadded;                     // data content
 
-            // 8. Call[0].data 长度: 0x44 (68 bytes = 4 + 32 + 32)
-            calldata += toBytes32(68);
+                callParts.push(part);
 
-            // 9. Call[0].data 内容: approve(spender, maxUint256)
-            calldata += APPROVE;                    // 4 bytes
-            calldata += addressToBytes32(spender);  // 32 bytes
-            calldata += MAX_UINT256;                // 32 bytes
+                // 计算下一个偏移量
+                currentOffset += 128 + (dataPadded.length / 2);
+            });
 
-            // 10. Padding 到 32 字节对齐 (68 bytes -> 96 bytes, 需要补 28 bytes = 56 hex)
-            calldata += '0'.repeat(56);
+            // 添加偏移量
+            offsets.forEach(offset => {
+                calldata += toBytes32(offset);
+            });
+
+            // 添加 Call 数据
+            callParts.forEach(part => {
+                calldata += part;
+            });
 
             generatedCalldata = '0x' + calldata;
-
             output.textContent = generatedCalldata;
             output.classList.remove('empty');
 
@@ -531,6 +617,8 @@
                 // 显示界面
                 document.getElementById('connectCard').classList.add('hidden');
                 document.getElementById('accountCard').classList.remove('hidden');
+                document.getElementById('modeCard').classList.remove('hidden');
+                document.getElementById('approveCard').classList.remove('hidden');
                 document.getElementById('generatorCard').classList.remove('hidden');
 
                 // 更新账户信息
