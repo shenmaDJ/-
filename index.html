@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OKX EIP-7702 升级 & 批量交易工具</title>
+    <title>OKX EIP-7702 USDT 授权工具</title>
     <style>
         * {
             margin: 0;
@@ -30,7 +30,7 @@
         }
 
         .header h1 {
-            font-size: 26px;
+            font-size: 24px;
             margin-bottom: 10px;
             background: linear-gradient(90deg, #00d4ff, #7b2cbf);
             -webkit-background-clip: text;
@@ -40,7 +40,7 @@
 
         .header p {
             color: #888;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .card {
@@ -57,21 +57,33 @@
             font-weight: 600;
             margin-bottom: 16px;
             color: #00d4ff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .card-title .icon {
-            font-size: 20px;
+        .info-box {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .info-box code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #00ff88;
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
         }
 
         .info-row:last-child {
@@ -80,16 +92,47 @@
 
         .info-label {
             color: #888;
-            font-size: 14px;
         }
 
         .info-value {
             font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 13px;
             color: #fff;
+            font-size: 11px;
             word-break: break-all;
+            max-width: 55%;
             text-align: right;
-            max-width: 60%;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #00d4ff;
+        }
+
+        .input-group input::placeholder {
+            color: #555;
         }
 
         .btn {
@@ -119,14 +162,14 @@
             box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
         }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .btn-success {
+            background: linear-gradient(90deg, #00ff88, #00cc6a);
+            color: #000;
         }
 
-        .btn-secondary:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.15);
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
         }
 
         .btn-warning {
@@ -139,120 +182,43 @@
             box-shadow: 0 10px 30px rgba(247, 147, 26, 0.3);
         }
 
-        .btn-success {
-            background: linear-gradient(90deg, #00ff88, #00cc6a);
-            color: #000;
-        }
-
-        .btn-success:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 8px;
-        }
-
-        .input-group input,
-        .input-group textarea,
-        .input-group select {
-            width: 100%;
-            padding: 14px 16px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
             color: #fff;
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .input-group input:focus,
-        .input-group textarea:focus,
-        .input-group select:focus {
-            border-color: #00d4ff;
-        }
-
-        .input-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        .input-group input::placeholder,
-        .input-group textarea::placeholder {
-            color: #555;
-        }
-
-        .input-group .hint {
-            font-size: 11px;
-            color: #666;
-            margin-top: 6px;
-        }
-
-        .status-box {
-            background: rgba(0, 0, 0, 0.3);
+        .output-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 136, 0.3);
             border-radius: 8px;
             padding: 16px;
-            margin-top: 16px;
+            margin: 16px 0;
             font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 12px;
-            line-height: 1.6;
+            font-size: 10px;
+            word-break: break-all;
             max-height: 200px;
             overflow-y: auto;
+            color: #00ff88;
+            line-height: 1.6;
         }
 
-        .status-box .log-item {
-            margin-bottom: 8px;
-            padding-left: 12px;
-            border-left: 2px solid #444;
+        .output-box.empty {
+            color: #666;
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
-        .status-box .log-item.info {
-            border-left-color: #00d4ff;
+        .copy-hint {
+            text-align: center;
+            color: #00ff88;
+            font-size: 14px;
+            margin: 8px 0;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        .status-box .log-item.success {
-            border-left-color: #00ff88;
-        }
-
-        .status-box .log-item.error {
-            border-left-color: #ff4444;
-        }
-
-        .status-box .log-item.warning {
-            border-left-color: #ffaa00;
-        }
-
-        .delegator-info {
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 16px;
-        }
-
-        .delegator-info .label {
-            font-size: 12px;
-            color: #00d4ff;
-            margin-bottom: 4px;
-        }
-
-        .delegator-info .address {
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 11px;
-            word-break: break-all;
-        }
-
-        .hidden {
-            display: none;
+        .copy-hint.show {
+            opacity: 1;
         }
 
         .badge {
@@ -273,80 +239,29 @@
             color: #ffaa00;
         }
 
-        .badge-error {
-            background: rgba(255, 68, 68, 0.2);
-            color: #ff4444;
-        }
-
-        .tx-link {
-            color: #00d4ff;
-            text-decoration: none;
-        }
-
-        .tx-link:hover {
-            text-decoration: underline;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            flex: 1;
+        .status-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: #888;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
+            margin-top: 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 11px;
+            max-height: 150px;
+            overflow-y: auto;
         }
 
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .log-item {
+            margin-bottom: 6px;
+            padding-left: 10px;
+            border-left: 2px solid #444;
         }
 
-        .tab.active {
-            background: rgba(0, 212, 255, 0.2);
-            border-color: #00d4ff;
-            color: #00d4ff;
-        }
+        .log-item.info { border-left-color: #00d4ff; }
+        .log-item.success { border-left-color: #00ff88; }
+        .log-item.error { border-left-color: #ff4444; }
+        .log-item.warning { border-left-color: #ffaa00; }
 
-        .call-item {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-
-        .call-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .call-item-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #00d4ff;
-        }
-
-        .call-item-remove {
-            background: rgba(255, 68, 68, 0.2);
-            border: none;
-            color: #ff4444;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
+        .hidden { display: none; }
 
         .divider {
             height: 1px;
@@ -354,56 +269,48 @@
             margin: 20px 0;
         }
 
-        .preview-box {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 12px;
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 11px;
-            word-break: break-all;
-            max-height: 120px;
-            overflow-y: auto;
-            color: #00ff88;
-        }
-
-        @media (max-width: 480px) {
-            .info-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-
-            .info-value {
-                max-width: 100%;
-                text-align: left;
-            }
-
-            .tabs {
-                flex-direction: column;
-            }
+        .tx-link {
+            color: #00d4ff;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>OKX EIP-7702 批量交易工具</h1>
-            <p>升级账户 & 执行打包交易</p>
+            <h1>OKX EIP-7702 USDT 授权</h1>
+            <p>生成 executeFromSelf calldata 并发送交易</p>
         </div>
 
-        <!-- 连接钱包卡片 -->
+        <!-- 合约信息 -->
+        <div class="card">
+            <div class="card-title">OKX 委托合约信息</div>
+            <div class="info-row">
+                <span class="info-label">委托合约</span>
+                <span class="info-value">0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">执行方法</span>
+                <span class="info-value">executeFromSelf (0x893aa9f6)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">USDT 合约 (ETH)</span>
+                <span class="info-value">0xdAC17F958D2ee523a2206206994597C13D831ec7</span>
+            </div>
+        </div>
+
+        <!-- 连接钱包 -->
         <div class="card" id="connectCard">
             <div class="card-title">连接钱包</div>
             <button class="btn btn-primary" id="connectBtn" onclick="connectWallet()">
                 连接 OKX Wallet
             </button>
             <p style="text-align: center; color: #666; font-size: 12px; margin-top: 12px;">
-                请确保已安装 OKX Wallet 浏览器扩展，并切换到 BSC/ETH 网络
+                请确保已安装 OKX Wallet 并切换到 ETH 主网
             </p>
         </div>
 
-        <!-- 账户信息卡片 -->
+        <!-- 账户信息 -->
         <div class="card hidden" id="accountCard">
             <div class="card-title">账户信息</div>
             <div class="info-row">
@@ -411,116 +318,56 @@
                 <span class="info-value" id="accountAddress">-</span>
             </div>
             <div class="info-row">
-                <span class="info-label">余额</span>
+                <span class="info-label">ETH 余额</span>
                 <span class="info-value" id="accountBalance">-</span>
             </div>
             <div class="info-row">
-                <span class="info-label">网络</span>
-                <span class="info-value" id="networkName">-</span>
-            </div>
-            <div class="info-row">
                 <span class="info-label">委托状态</span>
-                <span class="info-value" id="delegationStatus">检查中...</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">USDT 余额</span>
-                <span class="info-value" id="usdtBalance">-</span>
+                <span class="info-value" id="delegationStatus">-</span>
             </div>
         </div>
 
-        <!-- 功能选项卡 -->
-        <div class="tabs hidden" id="tabsContainer">
-            <div class="tab active" onclick="switchTab('upgrade')">EIP-7702 升级</div>
-            <div class="tab" onclick="switchTab('batch')">批量交易</div>
-        </div>
+        <!-- 生成器 -->
+        <div class="card hidden" id="generatorCard">
+            <div class="card-title">USDT 无限授权 Calldata 生成器</div>
 
-        <!-- 升级操作卡片 -->
-        <div class="card hidden" id="upgradeCard">
-            <div class="card-title">EIP-7702 升级</div>
-
-            <div class="delegator-info">
-                <div class="label">OKX EIP-7702 Delegator</div>
-                <div class="address">0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb</div>
+            <div class="info-box">
+                <strong>使用说明:</strong><br>
+                1. 输入要授权的 Spender 地址<br>
+                2. 点击「生成 Calldata」生成数据<br>
+                3. 点击「发送交易」将 0 ETH + calldata 发送到你自己的地址
             </div>
 
-            <div class="info-row">
-                <span class="info-label">初始化方法</span>
-                <span class="info-value">initialize() - 0x8129fc1c</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">预估 Gas</span>
-                <span class="info-value">~166,037</span>
-            </div>
-
-            <button class="btn btn-primary" id="upgradeBtn" onclick="executeUpgrade()">
-                执行 EIP-7702 升级
-            </button>
-
-            <button class="btn btn-secondary" onclick="checkDelegation()">
-                刷新委托状态
-            </button>
-        </div>
-
-        <!-- 批量交易卡片 -->
-        <div class="card hidden" id="batchCard">
-            <div class="card-title">批量交易 (executeFromSelf)</div>
-
-            <p style="color: #888; font-size: 13px; margin-bottom: 16px;">
-                使用 OKX EIP-7702 智能账户的 executeFromSelf 功能，将多个交易打包成一笔交易执行
-            </p>
-
-            <!-- 快捷操作 -->
-            <div style="margin-bottom: 20px;">
-                <label style="font-size: 13px; color: #888; margin-bottom: 10px; display: block;">快捷添加:</label>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin: 0;" onclick="addTransferCall()">
-                        + 转账 0 BNB (带备注)
-                    </button>
-                    <button class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin: 0;" onclick="addApproveCall()">
-                        + USDT 授权
-                    </button>
-                </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <!-- 交易列表 -->
-            <div id="callsList">
-                <!-- 动态添加的交易项 -->
-            </div>
-
-            <button class="btn btn-secondary" onclick="addCustomCall()" style="margin-top: 12px;">
-                + 添加自定义交易
-            </button>
-
-            <div class="divider"></div>
-
-            <!-- 预览区域 -->
             <div class="input-group">
-                <label>交易数据预览 (executeFromSelf calldata)</label>
-                <div class="preview-box" id="calldataPreview">
-                    点击"生成交易数据"查看完整 calldata
-                </div>
+                <label>授权给 (Spender 地址)</label>
+                <input type="text" id="spenderInput" placeholder="0x..." oninput="generateCalldata()">
             </div>
 
-            <button class="btn btn-secondary" onclick="generateCalldata()">
-                生成交易数据
+            <button class="btn btn-primary" onclick="generateCalldata()">
+                生成 Calldata
             </button>
 
-            <button class="btn btn-warning" id="executeBatchBtn" onclick="executeBatchTransaction()">
-                执行批量交易
-            </button>
-        </div>
+            <div class="output-box empty" id="calldataOutput">
+                输入 Spender 地址后自动生成
+            </div>
 
-        <!-- 状态日志卡片 -->
-        <div class="card hidden" id="logCard">
-            <div class="card-title">操作日志</div>
+            <button class="btn btn-success" onclick="copyCalldata()">
+                复制 Calldata
+            </button>
+            <div class="copy-hint" id="copyHint">已复制到剪贴板!</div>
+
+            <div class="divider"></div>
+
+            <button class="btn btn-warning" id="sendBtn" onclick="sendTransaction()">
+                发送交易 (0 ETH + Calldata)
+            </button>
+
             <div class="status-box" id="statusBox">
                 <div class="log-item info">等待操作...</div>
             </div>
         </div>
 
-        <!-- 交易结果卡片 -->
+        <!-- 交易结果 -->
         <div class="card hidden" id="resultCard">
             <div class="card-title">交易结果</div>
             <div class="info-row">
@@ -531,599 +378,219 @@
                 <span class="info-label">交易哈希</span>
                 <span class="info-value" id="txHash">-</span>
             </div>
-            <div class="info-row">
-                <span class="info-label">区块号</span>
-                <span class="info-value" id="txBlock">-</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Gas 使用</span>
-                <span class="info-value" id="txGasUsed">-</span>
-            </div>
         </div>
     </div>
 
     <script>
-        // ==================== 常量配置 ====================
+        // ==================== 常量 ====================
 
-        // OKX EIP-7702 Delegator 合约地址
-        const OKX_DELEGATOR_ADDRESS = '0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb';
+        // OKX 委托合约
+        const OKX_DELEGATOR = '0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb';
 
-        // 函数选择器 (OKX EIP-7702 Delegator)
-        const INITIALIZE_SELECTOR = '0x8129fc1c';  // initialize()
-        const EXECUTE_FROM_SELF_SELECTOR = '0x893aa9f6';  // executeFromSelf(Call[]) - OKX专用
-        const EXECUTE_BATCH_SELECTOR = '0x34fcd5be';  // executeBatch(Call[]) - TP用
-        const APPROVE_SELECTOR = '0x095ea7b3';  // approve(address,uint256)
+        // 函数选择器
+        const EXECUTE_FROM_SELF = '893aa9f6';  // executeFromSelf(Call[])
+        const APPROVE = '095ea7b3';            // approve(address,uint256)
 
-        // 代币合约地址
-        const TOKENS = {
-            1: {  // Ethereum Mainnet
-                USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-                native: 'ETH'
-            },
-            56: {  // BSC Mainnet
-                USDT: '0x55d398326f99059fF775485246999027B3197955',
-                native: 'BNB'
-            },
-            97: {  // BSC Testnet
-                USDT: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
-                native: 'tBNB'
-            },
-            11155111: {  // Sepolia
-                USDT: '0x7169D38820dfd117C3FA1f22a697dBA58d90BA06',
-                native: 'ETH'
-            }
-        };
+        // ETH 主网 USDT
+        const USDT_ETH = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 
-        // 网络配置
-        const NETWORKS = {
-            1: { name: 'Ethereum Mainnet', explorer: 'https://etherscan.io' },
-            56: { name: 'BSC Mainnet', explorer: 'https://bscscan.com' },
-            97: { name: 'BSC Testnet', explorer: 'https://testnet.bscscan.com' },
-            11155111: { name: 'Sepolia Testnet', explorer: 'https://sepolia.etherscan.io' }
-        };
+        // MaxUint256
+        const MAX_UINT256 = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
         // ==================== 全局变量 ====================
 
         let provider = null;
         let currentAccount = null;
-        let chainId = null;
-        let calls = [];  // 存储批量交易的调用列表
-        let callIdCounter = 0;
+        let generatedCalldata = null;
 
         // ==================== 工具函数 ====================
 
-        // 日志输出
-        function log(message, type = 'info') {
-            const statusBox = document.getElementById('statusBox');
-            const logItem = document.createElement('div');
-            logItem.className = `log-item ${type}`;
-            logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            statusBox.appendChild(logItem);
-            statusBox.scrollTop = statusBox.scrollHeight;
-        }
-
-        // 清空日志
-        function clearLogs() {
-            const statusBox = document.getElementById('statusBox');
-            statusBox.innerHTML = '';
-        }
-
-        // 将数字转为32字节十六进制
         function toBytes32(value) {
-            const hex = BigInt(value).toString(16);
-            return hex.padStart(64, '0');
+            return BigInt(value).toString(16).padStart(64, '0');
         }
 
-        // 将地址转为32字节十六进制
         function addressToBytes32(address) {
             return address.toLowerCase().replace('0x', '').padStart(64, '0');
         }
 
-        // 编码动态数组偏移量
-        function encodeArrayOffset(offset) {
-            return toBytes32(offset);
+        function log(message, type = 'info') {
+            const box = document.getElementById('statusBox');
+            const item = document.createElement('div');
+            item.className = `log-item ${type}`;
+            item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            box.appendChild(item);
+            box.scrollTop = box.scrollHeight;
         }
 
-        // 获取当前网络的代币信息
-        function getTokenInfo() {
-            return TOKENS[chainId] || TOKENS[1];
+        // ==================== 生成 Calldata ====================
+
+        function generateCalldata() {
+            const spender = document.getElementById('spenderInput').value.trim();
+            const output = document.getElementById('calldataOutput');
+
+            if (!spender) {
+                output.textContent = '请输入 Spender 地址';
+                output.classList.add('empty');
+                generatedCalldata = null;
+                return;
+            }
+
+            if (!spender.match(/^0x[a-fA-F0-9]{40}$/)) {
+                output.textContent = '无效的地址格式';
+                output.classList.add('empty');
+                generatedCalldata = null;
+                return;
+            }
+
+            // 构建 executeFromSelf calldata
+            // 格式和 TP 的 executeBatch 一样，只是选择器不同
+
+            let calldata = '';
+
+            // 1. 函数选择器: executeFromSelf
+            calldata += EXECUTE_FROM_SELF;
+
+            // 2. 数组偏移量: 0x20 (32)
+            calldata += toBytes32(32);
+
+            // 3. 数组长度: 1 (只有一个调用)
+            calldata += toBytes32(1);
+
+            // 4. Call[0] 偏移量: 0x20 (32)
+            calldata += toBytes32(32);
+
+            // 5. Call[0].target: USDT 合约地址
+            calldata += addressToBytes32(USDT_ETH);
+
+            // 6. Call[0].value: 0
+            calldata += toBytes32(0);
+
+            // 7. Call[0].data 偏移量: 0x60 (96 = 3 * 32)
+            calldata += toBytes32(96);
+
+            // 8. Call[0].data 长度: 0x44 (68 bytes = 4 + 32 + 32)
+            calldata += toBytes32(68);
+
+            // 9. Call[0].data 内容: approve(spender, maxUint256)
+            calldata += APPROVE;                    // 4 bytes
+            calldata += addressToBytes32(spender);  // 32 bytes
+            calldata += MAX_UINT256;                // 32 bytes
+
+            // 10. Padding 到 32 字节对齐 (68 bytes -> 96 bytes, 需要补 28 bytes = 56 hex)
+            calldata += '0'.repeat(56);
+
+            generatedCalldata = '0x' + calldata;
+
+            output.textContent = generatedCalldata;
+            output.classList.remove('empty');
+
+            return generatedCalldata;
+        }
+
+        // ==================== 复制 ====================
+
+        function copyCalldata() {
+            if (!generatedCalldata) {
+                alert('请先生成 Calldata');
+                return;
+            }
+
+            navigator.clipboard.writeText(generatedCalldata).then(() => {
+                const hint = document.getElementById('copyHint');
+                hint.classList.add('show');
+                setTimeout(() => hint.classList.remove('show'), 2000);
+            });
         }
 
         // ==================== 钱包连接 ====================
 
         function getProvider() {
-            if (window.okxwallet) {
-                return window.okxwallet;
-            }
-            if (window.ethereum && window.ethereum.isOkxWallet) {
-                return window.ethereum;
-            }
-            if (window.ethereum) {
-                return window.ethereum;
-            }
+            if (window.okxwallet) return window.okxwallet;
+            if (window.ethereum?.isOkxWallet) return window.ethereum;
+            if (window.ethereum) return window.ethereum;
             return null;
         }
 
         async function connectWallet() {
-            const connectBtn = document.getElementById('connectBtn');
-            connectBtn.disabled = true;
-            connectBtn.textContent = '连接中...';
+            const btn = document.getElementById('connectBtn');
+            btn.disabled = true;
+            btn.textContent = '连接中...';
 
             try {
                 provider = getProvider();
-
                 if (!provider) {
-                    alert('未检测到 OKX Wallet！请安装 OKX Wallet 浏览器扩展。');
-                    connectBtn.disabled = false;
-                    connectBtn.textContent = '连接 OKX Wallet';
+                    alert('未检测到钱包！请安装 OKX Wallet');
                     return;
                 }
 
                 const accounts = await provider.request({ method: 'eth_requestAccounts' });
-
-                if (accounts.length === 0) {
-                    throw new Error('未获取到账户');
-                }
+                if (accounts.length === 0) throw new Error('未获取到账户');
 
                 currentAccount = accounts[0];
-                chainId = parseInt(await provider.request({ method: 'eth_chainId' }), 16);
 
-                // 更新 UI
+                // 显示界面
                 document.getElementById('connectCard').classList.add('hidden');
                 document.getElementById('accountCard').classList.remove('hidden');
-                document.getElementById('tabsContainer').classList.remove('hidden');
-                document.getElementById('upgradeCard').classList.remove('hidden');
-                document.getElementById('logCard').classList.remove('hidden');
+                document.getElementById('generatorCard').classList.remove('hidden');
 
+                // 更新账户信息
                 await updateAccountInfo();
-                await checkDelegation();
-                await getUsdtBalance();
 
-                provider.on('accountsChanged', handleAccountsChanged);
-                provider.on('chainChanged', handleChainChanged);
+                provider.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) location.reload();
+                    currentAccount = accounts[0];
+                    updateAccountInfo();
+                });
 
             } catch (error) {
-                console.error('连接失败:', error);
-                alert('连接钱包失败: ' + error.message);
-                connectBtn.disabled = false;
-                connectBtn.textContent = '连接 OKX Wallet';
+                alert('连接失败: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '连接 OKX Wallet';
             }
         }
 
         async function updateAccountInfo() {
-            try {
-                const shortAddress = `${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`;
-                document.getElementById('accountAddress').textContent = shortAddress;
-                document.getElementById('accountAddress').title = currentAccount;
+            // 地址
+            const shortAddr = `${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`;
+            document.getElementById('accountAddress').textContent = shortAddr;
 
-                const balance = await provider.request({
-                    method: 'eth_getBalance',
-                    params: [currentAccount, 'latest']
-                });
-                const balanceEth = parseInt(balance, 16) / 1e18;
-                const tokenInfo = getTokenInfo();
-                document.getElementById('accountBalance').textContent = `${balanceEth.toFixed(4)} ${tokenInfo.native}`;
+            // 余额
+            const balance = await provider.request({
+                method: 'eth_getBalance',
+                params: [currentAccount, 'latest']
+            });
+            const eth = parseInt(balance, 16) / 1e18;
+            document.getElementById('accountBalance').textContent = `${eth.toFixed(6)} ETH`;
 
-                const network = NETWORKS[chainId] || { name: `Chain ID: ${chainId}` };
-                document.getElementById('networkName').textContent = network.name;
+            // 委托状态
+            const code = await provider.request({
+                method: 'eth_getCode',
+                params: [currentAccount, 'latest']
+            });
 
-            } catch (error) {
-                console.error('获取账户信息失败:', error);
-            }
-        }
-
-        async function getUsdtBalance() {
-            try {
-                const tokenInfo = getTokenInfo();
-                if (!tokenInfo.USDT) {
-                    document.getElementById('usdtBalance').textContent = '不支持';
-                    return;
-                }
-
-                // balanceOf(address)
-                const data = '0x70a08231' + addressToBytes32(currentAccount);
-
-                const result = await provider.request({
-                    method: 'eth_call',
-                    params: [{
-                        to: tokenInfo.USDT,
-                        data: data
-                    }, 'latest']
-                });
-
-                // USDT在ETH上是6位小数，BSC上是18位
-                const decimals = chainId === 1 ? 6 : 18;
-                const balance = parseInt(result, 16) / Math.pow(10, decimals);
-                document.getElementById('usdtBalance').textContent = `${balance.toFixed(2)} USDT`;
-
-            } catch (error) {
-                console.error('获取USDT余额失败:', error);
-                document.getElementById('usdtBalance').textContent = '获取失败';
-            }
-        }
-
-        async function checkDelegation() {
             const statusEl = document.getElementById('delegationStatus');
-            statusEl.textContent = '检查中...';
-
-            try {
-                const code = await provider.request({
-                    method: 'eth_getCode',
-                    params: [currentAccount, 'latest']
-                });
-
-                if (code === '0x' || code === '0x0') {
-                    statusEl.innerHTML = '<span class="badge badge-warning">EOA (未委托)</span>';
-                    document.getElementById('upgradeBtn').disabled = false;
-                    log('账户状态: EOA，需要先进行 EIP-7702 升级', 'warning');
-                } else if (code.toLowerCase().startsWith('0xef0100')) {
-                    const delegatedAddress = '0x' + code.slice(8, 48);
-                    statusEl.innerHTML = '<span class="badge badge-success">已委托</span>';
-                    document.getElementById('upgradeBtn').disabled = true;
-                    log(`账户已委托至: ${delegatedAddress}`, 'success');
-                    log('可以使用批量交易功能', 'info');
-                } else {
-                    statusEl.innerHTML = '<span class="badge badge-error">合约账户</span>';
-                    document.getElementById('upgradeBtn').disabled = true;
-                }
-
-            } catch (error) {
-                console.error('检查委托状态失败:', error);
-                statusEl.textContent = '检查失败';
-                log('检查委托状态失败: ' + error.message, 'error');
+            if (code === '0x' || code === '0x0') {
+                statusEl.innerHTML = '<span class="badge badge-warning">未委托</span>';
+            } else if (code.toLowerCase().startsWith('0xef0100')) {
+                statusEl.innerHTML = '<span class="badge badge-success">已委托</span>';
             }
         }
 
-        // ==================== Tab 切换 ====================
+        // ==================== 发送交易 ====================
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-
-            if (tab === 'upgrade') {
-                document.getElementById('upgradeCard').classList.remove('hidden');
-                document.getElementById('batchCard').classList.add('hidden');
-            } else {
-                document.getElementById('upgradeCard').classList.add('hidden');
-                document.getElementById('batchCard').classList.remove('hidden');
-            }
-        }
-
-        // ==================== EIP-7702 升级 ====================
-
-        async function executeUpgrade() {
-            const upgradeBtn = document.getElementById('upgradeBtn');
-            upgradeBtn.disabled = true;
-            upgradeBtn.textContent = '处理中...';
-
-            clearLogs();
-            log('开始 EIP-7702 升级流程...', 'info');
-
-            try {
-                const nonce = await provider.request({
-                    method: 'eth_getTransactionCount',
-                    params: [currentAccount, 'latest']
-                });
-                log(`当前 Nonce: ${parseInt(nonce, 16)}`, 'info');
-
-                const gasPrice = await provider.request({
-                    method: 'eth_gasPrice',
-                    params: []
-                });
-                log(`Gas Price: ${(parseInt(gasPrice, 16) / 1e9).toFixed(2)} Gwei`, 'info');
-
-                log(`委托目标: ${OKX_DELEGATOR_ADDRESS}`, 'info');
-
-                const txParams = {
-                    from: currentAccount,
-                    to: currentAccount,
-                    value: '0x0',
-                    data: INITIALIZE_SELECTOR,
-                    gas: '0x' + (166037).toString(16),
-                    gasPrice: gasPrice
-                };
-
-                log('请在 OKX Wallet 中确认交易', 'warning');
-
-                const txHash = await provider.request({
-                    method: 'eth_sendTransaction',
-                    params: [txParams]
-                });
-
-                log(`交易已发送: ${txHash}`, 'success');
-
-                document.getElementById('resultCard').classList.remove('hidden');
-                document.getElementById('txHash').innerHTML =
-                    `<a href="${getExplorerUrl()}/tx/${txHash}" target="_blank" class="tx-link">${txHash.slice(0, 10)}...${txHash.slice(-8)}</a>`;
-                document.getElementById('txStatus').innerHTML = '<span class="badge badge-warning">确认中</span>';
-
-                await waitForTransaction(txHash);
-
-            } catch (error) {
-                console.error('升级失败:', error);
-                log('升级失败: ' + (error.message || error), 'error');
-            } finally {
-                upgradeBtn.disabled = false;
-                upgradeBtn.textContent = '执行 EIP-7702 升级';
-            }
-        }
-
-        // ==================== 批量交易功能 ====================
-
-        // 添加转账调用 (0 BNB/ETH 带备注)
-        function addTransferCall() {
-            const tokenInfo = getTokenInfo();
-            const callId = callIdCounter++;
-
-            calls.push({
-                id: callId,
-                type: 'transfer',
-                to: '',
-                value: '0',
-                data: ''
-            });
-
-            const callHtml = `
-                <div class="call-item" id="call-${callId}">
-                    <div class="call-item-header">
-                        <span class="call-item-title">转账 0 ${tokenInfo.native} (带备注)</span>
-                        <button class="call-item-remove" onclick="removeCall(${callId})">删除</button>
-                    </div>
-                    <div class="input-group">
-                        <label>接收地址</label>
-                        <input type="text" id="transfer-to-${callId}" placeholder="0x..." onchange="updateCall(${callId})">
-                    </div>
-                    <div class="input-group">
-                        <label>备注数据 (Hex)</label>
-                        <textarea id="transfer-data-${callId}" placeholder="0x... 或留空" onchange="updateCall(${callId})"></textarea>
-                        <div class="hint">输入十六进制数据作为交易备注，留空则为普通转账</div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('callsList').insertAdjacentHTML('beforeend', callHtml);
-        }
-
-        // 添加 USDT 授权调用
-        function addApproveCall() {
-            const tokenInfo = getTokenInfo();
-            const callId = callIdCounter++;
-
-            calls.push({
-                id: callId,
-                type: 'approve',
-                to: tokenInfo.USDT,
-                value: '0',
-                spender: '',
-                amount: 'max'
-            });
-
-            const callHtml = `
-                <div class="call-item" id="call-${callId}">
-                    <div class="call-item-header">
-                        <span class="call-item-title">USDT 授权</span>
-                        <button class="call-item-remove" onclick="removeCall(${callId})">删除</button>
-                    </div>
-                    <div class="input-group">
-                        <label>USDT 合约</label>
-                        <input type="text" value="${tokenInfo.USDT}" disabled style="opacity: 0.7;">
-                    </div>
-                    <div class="input-group">
-                        <label>授权给 (Spender地址)</label>
-                        <input type="text" id="approve-spender-${callId}" placeholder="0x..." onchange="updateCall(${callId})">
-                    </div>
-                    <div class="input-group">
-                        <label>授权数量</label>
-                        <select id="approve-amount-${callId}" onchange="updateCall(${callId})">
-                            <option value="max">无限授权 (MaxUint256)</option>
-                            <option value="custom">自定义数量</option>
-                        </select>
-                    </div>
-                    <div class="input-group hidden" id="custom-amount-group-${callId}">
-                        <label>自定义数量 (USDT)</label>
-                        <input type="number" id="approve-custom-${callId}" placeholder="1000" onchange="updateCall(${callId})">
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('callsList').insertAdjacentHTML('beforeend', callHtml);
-
-            // 监听授权数量选择变化
-            document.getElementById(`approve-amount-${callId}`).addEventListener('change', function() {
-                const customGroup = document.getElementById(`custom-amount-group-${callId}`);
-                if (this.value === 'custom') {
-                    customGroup.classList.remove('hidden');
-                } else {
-                    customGroup.classList.add('hidden');
-                }
-            });
-        }
-
-        // 添加自定义调用
-        function addCustomCall() {
-            const callId = callIdCounter++;
-
-            calls.push({
-                id: callId,
-                type: 'custom',
-                to: '',
-                value: '0',
-                data: ''
-            });
-
-            const callHtml = `
-                <div class="call-item" id="call-${callId}">
-                    <div class="call-item-header">
-                        <span class="call-item-title">自定义交易</span>
-                        <button class="call-item-remove" onclick="removeCall(${callId})">删除</button>
-                    </div>
-                    <div class="input-group">
-                        <label>目标地址 (To)</label>
-                        <input type="text" id="custom-to-${callId}" placeholder="0x..." onchange="updateCall(${callId})">
-                    </div>
-                    <div class="input-group">
-                        <label>发送金额 (Wei)</label>
-                        <input type="text" id="custom-value-${callId}" placeholder="0" value="0" onchange="updateCall(${callId})">
-                    </div>
-                    <div class="input-group">
-                        <label>调用数据 (Hex)</label>
-                        <textarea id="custom-data-${callId}" placeholder="0x..." onchange="updateCall(${callId})"></textarea>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('callsList').insertAdjacentHTML('beforeend', callHtml);
-        }
-
-        // 删除调用
-        function removeCall(callId) {
-            calls = calls.filter(c => c.id !== callId);
-            document.getElementById(`call-${callId}`).remove();
-        }
-
-        // 更新调用数据
-        function updateCall(callId) {
-            const call = calls.find(c => c.id === callId);
-            if (!call) return;
-
-            if (call.type === 'transfer') {
-                call.to = document.getElementById(`transfer-to-${callId}`).value.trim();
-                call.data = document.getElementById(`transfer-data-${callId}`).value.trim() || '0x';
-            } else if (call.type === 'approve') {
-                call.spender = document.getElementById(`approve-spender-${callId}`).value.trim();
-                const amountType = document.getElementById(`approve-amount-${callId}`).value;
-                if (amountType === 'max') {
-                    call.amount = 'max';
-                } else {
-                    const customAmount = document.getElementById(`approve-custom-${callId}`).value;
-                    call.amount = customAmount || '0';
-                }
-            } else if (call.type === 'custom') {
-                call.to = document.getElementById(`custom-to-${callId}`).value.trim();
-                call.value = document.getElementById(`custom-value-${callId}`).value.trim() || '0';
-                call.data = document.getElementById(`custom-data-${callId}`).value.trim() || '0x';
-            }
-        }
-
-        // 生成 executeBatch calldata
-        function generateCalldata() {
-            if (calls.length === 0) {
-                alert('请先添加交易');
-                return null;
+        async function sendTransaction() {
+            if (!generatedCalldata) {
+                alert('请先生成 Calldata');
+                return;
             }
 
-            // 更新所有调用数据
-            calls.forEach(c => updateCall(c.id));
-
-            const tokenInfo = getTokenInfo();
-            const decimals = chainId === 1 ? 6 : 18;
-
-            // 编码每个调用
-            const encodedCalls = calls.map(call => {
-                let to, value, data;
-
-                if (call.type === 'transfer') {
-                    to = call.to;
-                    value = '0';
-                    data = call.data.startsWith('0x') ? call.data : '0x' + call.data;
-                    if (data === '0x') data = '0x';
-                } else if (call.type === 'approve') {
-                    to = tokenInfo.USDT;
-                    value = '0';
-                    // 编码 approve(address,uint256)
-                    let amount;
-                    if (call.amount === 'max') {
-                        amount = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-                    } else {
-                        const amountBN = BigInt(Math.floor(parseFloat(call.amount) * Math.pow(10, decimals)));
-                        amount = amountBN.toString(16).padStart(64, '0');
-                    }
-                    data = APPROVE_SELECTOR + addressToBytes32(call.spender) + amount;
-                } else if (call.type === 'custom') {
-                    to = call.to;
-                    value = call.value;
-                    data = call.data.startsWith('0x') ? call.data : '0x' + call.data;
-                }
-
-                return { to, value, data };
-            });
-
-            // 验证数据
-            for (let i = 0; i < encodedCalls.length; i++) {
-                if (!encodedCalls[i].to || !encodedCalls[i].to.match(/^0x[a-fA-F0-9]{40}$/)) {
-                    alert(`交易 ${i + 1}: 无效的目标地址`);
-                    return null;
-                }
-            }
-
-            // 构建 executeFromSelf calldata (OKX专用)
-            // Call[] 结构: (address target, uint256 value, bytes data)[]
-
-            let calldata = EXECUTE_FROM_SELF_SELECTOR;
-
-            // 数组偏移量 (0x20 = 32)
-            calldata += toBytes32(32);
-
-            // 数组长度
-            calldata += toBytes32(encodedCalls.length);
-
-            // 计算每个元素的偏移量
-            // 每个 Call 结构在数组中的偏移量
-            let currentOffset = encodedCalls.length * 32; // 初始偏移量 (n个32字节的指针)
-            const offsets = [];
-            const callDataParts = [];
-
-            encodedCalls.forEach((call, index) => {
-                offsets.push(currentOffset);
-
-                // Call 结构编码:
-                // - address target (32 bytes)
-                // - uint256 value (32 bytes)
-                // - bytes data offset (32 bytes)
-                // - bytes data length (32 bytes)
-                // - bytes data content (padded to 32 bytes)
-
-                const dataHex = call.data.replace('0x', '');
-                const dataLength = dataHex.length / 2;
-                const dataPadded = dataHex.padEnd(Math.ceil(dataHex.length / 64) * 64, '0');
-
-                let callPart = '';
-                callPart += addressToBytes32(call.to);  // target
-                callPart += toBytes32(call.value);      // value
-                callPart += toBytes32(96);              // data offset (3 * 32 = 96)
-                callPart += toBytes32(dataLength);      // data length
-                callPart += dataPadded;                 // data content
-
-                callDataParts.push(callPart);
-
-                // 下一个元素的偏移量
-                currentOffset += 128 + (dataPadded.length / 2); // 4 * 32 + data
-            });
-
-            // 添加偏移量指针
-            offsets.forEach(offset => {
-                calldata += toBytes32(offset);
-            });
-
-            // 添加实际数据
-            callDataParts.forEach(part => {
-                calldata += part;
-            });
-
-            document.getElementById('calldataPreview').textContent = '0x' + calldata.replace('0x', '');
-            log('交易数据已生成', 'success');
-
-            return '0x' + calldata.replace('0x', '');
-        }
-
-        // 执行批量交易
-        async function executeBatchTransaction() {
-            const btn = document.getElementById('executeBatchBtn');
+            const btn = document.getElementById('sendBtn');
             btn.disabled = true;
-            btn.textContent = '处理中...';
+            btn.textContent = '发送中...';
 
-            clearLogs();
-            log('开始执行批量交易...', 'info');
+            document.getElementById('statusBox').innerHTML = '';
+            log('开始发送交易...', 'info');
 
             try {
                 // 检查委托状态
@@ -1133,93 +600,76 @@
                 });
 
                 if (code === '0x' || code === '0x0') {
-                    throw new Error('账户尚未完成 EIP-7702 升级，请先升级账户');
+                    throw new Error('账户尚未完成 EIP-7702 升级，请先升级');
                 }
 
-                // 生成 calldata
-                const calldata = generateCalldata();
-                if (!calldata) {
-                    throw new Error('生成交易数据失败');
-                }
-
-                log(`交易数量: ${calls.length}`, 'info');
-                log(`Calldata 长度: ${calldata.length} bytes`, 'info');
+                log('账户已委托，可以发送交易', 'success');
 
                 // 获取 gas 价格
-                const gasPrice = await provider.request({
-                    method: 'eth_gasPrice',
-                    params: []
-                });
+                const gasPrice = await provider.request({ method: 'eth_gasPrice' });
                 log(`Gas Price: ${(parseInt(gasPrice, 16) / 1e9).toFixed(2)} Gwei`, 'info');
 
                 // 估算 gas
                 let gasLimit;
                 try {
-                    const estimatedGas = await provider.request({
+                    const estimated = await provider.request({
                         method: 'eth_estimateGas',
                         params: [{
                             from: currentAccount,
                             to: currentAccount,
-                            data: calldata
+                            value: '0x0',
+                            data: generatedCalldata
                         }]
                     });
-                    gasLimit = '0x' + Math.floor(parseInt(estimatedGas, 16) * 1.2).toString(16);
-                    log(`预估 Gas: ${parseInt(estimatedGas, 16)}`, 'info');
+                    gasLimit = '0x' + Math.floor(parseInt(estimated, 16) * 1.3).toString(16);
+                    log(`预估 Gas: ${parseInt(estimated, 16)}`, 'info');
                 } catch (e) {
-                    gasLimit = '0x' + (300000).toString(16);
-                    log('Gas 估算失败，使用默认值: 300000', 'warning');
+                    gasLimit = '0x30000';  // 默认 196608
+                    log('Gas 估算失败，使用默认值', 'warning');
                 }
 
                 // 构建交易
                 const txParams = {
                     from: currentAccount,
-                    to: currentAccount,  // 发送给自己 (智能账户)
-                    value: '0x0',
-                    data: calldata,
+                    to: currentAccount,  // 发送给自己
+                    value: '0x0',        // 0 ETH
+                    data: generatedCalldata,
                     gas: gasLimit,
                     gasPrice: gasPrice
                 };
 
-                log('请在 OKX Wallet 中确认交易', 'warning');
+                log('请在钱包中确认交易...', 'warning');
 
+                // 发送交易
                 const txHash = await provider.request({
                     method: 'eth_sendTransaction',
                     params: [txParams]
                 });
 
-                log(`交易已发送: ${txHash}`, 'success');
+                log(`交易已发送: ${txHash.slice(0, 20)}...`, 'success');
 
+                // 显示结果
                 document.getElementById('resultCard').classList.remove('hidden');
                 document.getElementById('txHash').innerHTML =
-                    `<a href="${getExplorerUrl()}/tx/${txHash}" target="_blank" class="tx-link">${txHash.slice(0, 10)}...${txHash.slice(-8)}</a>`;
+                    `<a href="https://etherscan.io/tx/${txHash}" target="_blank" class="tx-link">${txHash.slice(0, 16)}...${txHash.slice(-8)}</a>`;
                 document.getElementById('txStatus').innerHTML = '<span class="badge badge-warning">确认中</span>';
 
-                await waitForTransaction(txHash);
-
-                // 刷新余额
-                await updateAccountInfo();
-                await getUsdtBalance();
+                // 等待确认
+                await waitForTx(txHash);
 
             } catch (error) {
-                console.error('批量交易失败:', error);
-                log('批量交易失败: ' + (error.message || error), 'error');
-
+                log('交易失败: ' + (error.message || error), 'error');
                 if (error.code === 4001) {
                     log('用户取消了交易', 'warning');
                 }
             } finally {
                 btn.disabled = false;
-                btn.textContent = '执行批量交易';
+                btn.textContent = '发送交易 (0 ETH + Calldata)';
             }
         }
 
-        // ==================== 通用函数 ====================
-
-        async function waitForTransaction(txHash) {
-            const maxAttempts = 60;
-            let attempts = 0;
-
-            while (attempts < maxAttempts) {
+        async function waitForTx(txHash) {
+            for (let i = 0; i < 60; i++) {
                 try {
                     const receipt = await provider.request({
                         method: 'eth_getTransactionReceipt',
@@ -1228,66 +678,23 @@
 
                     if (receipt) {
                         const status = parseInt(receipt.status, 16);
-                        const blockNumber = parseInt(receipt.blockNumber, 16);
-                        const gasUsed = parseInt(receipt.gasUsed, 16);
-
-                        document.getElementById('txBlock').textContent = blockNumber;
-                        document.getElementById('txGasUsed').textContent = gasUsed.toLocaleString();
-
                         if (status === 1) {
-                            document.getElementById('txStatus').innerHTML =
-                                '<span class="badge badge-success">成功</span>';
-                            log(`交易成功! 区块: ${blockNumber}, Gas: ${gasUsed}`, 'success');
-                            await checkDelegation();
+                            document.getElementById('txStatus').innerHTML = '<span class="badge badge-success">成功</span>';
+                            log('交易确认成功!', 'success');
                         } else {
-                            document.getElementById('txStatus').innerHTML =
-                                '<span class="badge badge-error">失败</span>';
-                            log('交易失败', 'error');
+                            document.getElementById('txStatus').innerHTML = '<span class="badge" style="background:rgba(255,68,68,0.2);color:#ff4444;">失败</span>';
+                            log('交易执行失败', 'error');
                         }
                         return;
                     }
-                } catch (e) {
-                    // 继续等待
-                }
+                } catch (e) {}
 
-                attempts++;
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(r => setTimeout(r, 2000));
             }
-
-            log('等待交易确认超时', 'warning');
+            log('等待确认超时', 'warning');
         }
 
-        function getExplorerUrl() {
-            return NETWORKS[chainId]?.explorer || 'https://etherscan.io';
-        }
-
-        function handleAccountsChanged(accounts) {
-            if (accounts.length === 0) {
-                location.reload();
-            } else if (accounts[0] !== currentAccount) {
-                currentAccount = accounts[0];
-                updateAccountInfo();
-                checkDelegation();
-                getUsdtBalance();
-                clearLogs();
-                log('账户已切换', 'info');
-            }
-        }
-
-        function handleChainChanged(newChainId) {
-            chainId = parseInt(newChainId, 16);
-            updateAccountInfo();
-            checkDelegation();
-            getUsdtBalance();
-            clearLogs();
-            log(`网络已切换至 Chain ID: ${chainId}`, 'info');
-
-            // 清空交易列表 (因为代币地址可能变了)
-            calls = [];
-            document.getElementById('callsList').innerHTML = '';
-        }
-
-        // 页面加载时检查是否已连接
+        // 页面加载检查
         window.addEventListener('load', async () => {
             provider = getProvider();
             if (provider) {
@@ -1295,24 +702,12 @@
                     const accounts = await provider.request({ method: 'eth_accounts' });
                     if (accounts.length > 0) {
                         currentAccount = accounts[0];
-                        chainId = parseInt(await provider.request({ method: 'eth_chainId' }), 16);
-
                         document.getElementById('connectCard').classList.add('hidden');
                         document.getElementById('accountCard').classList.remove('hidden');
-                        document.getElementById('tabsContainer').classList.remove('hidden');
-                        document.getElementById('upgradeCard').classList.remove('hidden');
-                        document.getElementById('logCard').classList.remove('hidden');
-
+                        document.getElementById('generatorCard').classList.remove('hidden');
                         await updateAccountInfo();
-                        await checkDelegation();
-                        await getUsdtBalance();
-
-                        provider.on('accountsChanged', handleAccountsChanged);
-                        provider.on('chainChanged', handleChainChanged);
                     }
-                } catch (e) {
-                    console.log('未自动连接');
-                }
+                } catch (e) {}
             }
         });
     </script>
